@@ -1,0 +1,7 @@
+tier,segment,size_beta,status,room_type_codes,expedia_status
+budget,leisure,0.693994402609182,estimated_proxy,"A,E,D",unavailable_no_local_data
+budget,business,1.084557561225355,estimated_proxy,"A,D,E",unavailable_no_local_data
+midscale,leisure,0.6794815054819312,estimated_proxy,"A,E,D",unavailable_no_local_data
+midscale,business,1.0600826322147516,estimated_proxy,"A,D,E",unavailable_no_local_data
+luxury,leisure,0.5895100844739062,estimated_proxy,"A,E,D",unavailable_no_local_data
+luxury,business,0.920234749819703,estimated_proxy,"A,D,E",unavailable_no_local_data

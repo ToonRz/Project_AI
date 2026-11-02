@@ -1,0 +1,1 @@
+"""Hotel dynamic pricing project."""

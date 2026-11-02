@@ -1,0 +1,13 @@
+pandas>=2.2,<3
+numpy>=1.26,<3
+scikit-learn>=1.5,<2
+statsmodels>=0.14,<1
+matplotlib>=3.9,<4
+gymnasium>=1.0,<2
+stable-baselines3>=2.4,<3
+sb3-contrib>=2.4,<3
+streamlit>=1.40,<2
+PyYAML>=6,<7
+pytest>=8,<9
+jupyter>=1.1,<2
+kaggle>=1.6,<2

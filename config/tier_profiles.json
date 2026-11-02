@@ -1,0 +1,1488 @@
+{
+  "profile_version": 1,
+  "calibration_status": "hbd_calibrated_expedia_defaults",
+  "source_note": "Values below are from the user-provided specification unless marked otherwise; Expedia calibration is pending access to the competition data.",
+  "tiers": {
+    "budget": {
+      "id": 0,
+      "stars": 3,
+      "reference_price_thb": 1200,
+      "business_share": 0.15,
+      "demand_per_room_episode": 2.3,
+      "variable_cost_thb": 250,
+      "ota_share_leisure": 0.8634290843806104,
+      "ota_share_business": 0.06302829841969863,
+      "segments": {
+        "leisure": {
+          "wtp_median_reference": 0.88,
+          "wtp_sigma": 0.4527371205598404,
+          "size_beta": 0.693994402609182,
+          "cancel_base": 0.4598035288194185,
+          "size_beta_source": "hotel_booking_demand_room_type_adr_proxy",
+          "sources": {
+            "wtp_median_reference": "user_spec_default_no_star_tier_currency_mapping",
+            "wtp_sigma": "hotel_booking_demand_log_adr_std",
+            "size_beta": "hotel_booking_demand_room_type_adr_proxy",
+            "cancel_base": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          },
+          "wtp_calibration": {
+            "mu_log_adr": 4.550300247027503,
+            "sigma_log_adr": 0.4527371205598404,
+            "geometric_mean_adr_source_currency": 94.66082568012735,
+            "observation_count": 111400
+          },
+          "cancellation_calibration": {
+            "pooled_hbd_model": {
+              "status": "fitted",
+              "observation_count": 32791,
+              "cancel_rate": 0.19743222225610685,
+              "cancel_base": 0.3549360573342879,
+              "deposit_shares": {
+                "No Deposit": 0.9830136317892104,
+                "Non Refund": 0.015949498337958588,
+                "Refundable": 0.0010368698728309598
+              },
+              "logistic": {
+                "intercept": -0.6333056814785878,
+                "coefficients": {
+                  "lead_time_scaled": 1.8830148817741261,
+                  "deposit_type=No Deposit": -1.6063875419217006,
+                  "deposit_type=Non Refund": 2.508633762520774,
+                  "deposit_type=Refundable": -1.4900053145986798
+                },
+                "feature_names": [
+                  "lead_time_scaled",
+                  "deposit_type=No Deposit",
+                  "deposit_type=Non Refund",
+                  "deposit_type=Refundable"
+                ],
+                "roc_auc_in_sample": 0.7017725057677932,
+                "log_loss_in_sample": 0.44766369609683554
+              },
+              "predicted_cancel_rate_by_days_remaining": [
+                0.11417113106661918,
+                0.12007189257202071,
+                0.12626000174562438,
+                0.13274540715510766,
+                0.1395378085101721,
+                0.1466465743006126,
+                0.15408065320352712,
+                0.16184847953621712,
+                0.16995787317809508,
+                0.1784159345476474,
+                0.18722893539744864,
+                0.19640220637875774,
+                0.20594002252378069,
+                0.21584548799367836,
+                0.2261204216382399,
+                0.23676524510226163,
+                0.24777887538661444,
+                0.2591586239205932,
+                0.2709001043177997,
+                0.2829971510617599,
+                0.295441751391224,
+                0.3082239926208831,
+                0.3213320270345183,
+                0.3347520563195913,
+                0.34846833727248977,
+                0.3624632101922231,
+                0.3767171510006318,
+                0.39120884768568476,
+                0.40591530117113256,
+                0.4208119501838077
+              ]
+            },
+            "tier_default_scale": 1.2100092863668908,
+            "source": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          }
+        },
+        "business": {
+          "wtp_median_reference": 1.35,
+          "wtp_sigma": 0.4508752553222641,
+          "size_beta": 1.084557561225355,
+          "cancel_base": 0.3307661028472849,
+          "size_beta_source": "hotel_booking_demand_room_type_adr_proxy",
+          "sources": {
+            "wtp_median_reference": "user_spec_default_no_star_tier_currency_mapping",
+            "wtp_sigma": "hotel_booking_demand_log_adr_std",
+            "size_beta": "hotel_booking_demand_room_type_adr_proxy",
+            "cancel_base": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          },
+          "wtp_calibration": {
+            "mu_log_adr": 4.179123645111834,
+            "sigma_log_adr": 0.4508752553222641,
+            "geometric_mean_adr_source_currency": 65.30859462211465,
+            "observation_count": 5442
+          },
+          "cancellation_calibration": {
+            "pooled_hbd_model": {
+              "status": "fitted",
+              "observation_count": 4260,
+              "cancel_rate": 0.12230046948356807,
+              "cancel_base": 0.22786109307257407,
+              "deposit_shares": {
+                "No Deposit": 0.9786384976525822,
+                "Non Refund": 0.021361502347417842
+              },
+              "logistic": {
+                "intercept": -0.39856078639034637,
+                "coefficients": {
+                  "lead_time_scaled": 1.251539594716773,
+                  "deposit_type=No Deposit": -2.066886825200953,
+                  "deposit_type=Non Refund": 1.7380986349819674
+                },
+                "feature_names": [
+                  "lead_time_scaled",
+                  "deposit_type=No Deposit",
+                  "deposit_type=Non Refund"
+                ],
+                "roc_auc_in_sample": 0.6558721963184138,
+                "log_loss_in_sample": 0.33314023323374653
+              },
+              "predicted_cancel_rate_by_days_remaining": [
+                0.09671453452225902,
+                0.09996169646104838,
+                0.10331484445984544,
+                0.10677694690775197,
+                0.11035098476203413,
+                0.11403994468948887,
+                0.11784681168340908,
+                0.12177456114543278,
+                0.1258261504237421,
+                0.13000450980162634,
+                0.1343125329333623,
+                0.1387530667277165,
+                0.14332890068314164,
+                0.14804275568294706,
+                0.15289727226336455,
+                0.15789499837250848,
+                0.16303837664373927,
+                0.16832973121285713,
+                0.17377125411486247,
+                0.17936499130268382,
+                0.18511282833724618,
+                0.19101647580548653,
+                0.19707745453034403,
+                0.20329708064428922,
+                0.20967645060552137,
+                0.2162164262434485,
+                0.22291761992737236,
+                0.22978037995929615,
+                0.23680477629833732,
+                0.243990586730214
+              ]
+            },
+            "tier_default_scale": 2.205107352315233,
+            "source": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          }
+        }
+      },
+      "rooms": [
+        {
+          "name": "Standard",
+          "size_m2": 18,
+          "count": 36,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        },
+        {
+          "name": "Superior",
+          "size_m2": 24,
+          "count": 18,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        },
+        {
+          "name": "Family",
+          "size_m2": 32,
+          "count": 6,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        }
+      ],
+      "spreads": {
+        "reference_price": 0.15,
+        "demand": 0.2,
+        "wtp": 0.1,
+        "business_wtp_extra": 0.05,
+        "sigma": 0.2,
+        "beta": 0.15,
+        "cancel": 0.25,
+        "cost": 0.15,
+        "room_size": 0.12,
+        "room_count": 0.3
+      },
+      "sources": {
+        "profile": "user_spec_default",
+        "spreads": "user_spec_default",
+        "business_share": "user_spec_default_no_star_tier_mapping",
+        "room_types": "user_spec_default",
+        "reference_price": "user_spec_default",
+        "variable_cost": "user_spec_default",
+        "reference_price_usd": "expedia_unavailable_user_spec_default",
+        "reference_price_spread": "expedia_unavailable_user_spec_default",
+        "logistic_price_response": "expedia_unavailable_not_fitted",
+        "reference_price_thb": "user_spec_default",
+        "demand_per_room_episode": "user_spec_default",
+        "variable_cost_thb": "user_spec_default",
+        "ota_share_leisure": "hotel_booking_demand_distribution_channel",
+        "ota_share_business": "hotel_booking_demand_distribution_channel",
+        "rooms": "user_spec_default",
+        "spread_reference_price": "user_spec_default_pending_expedia",
+        "spread_demand": "user_spec_default_pending_expedia",
+        "spread_wtp": "user_spec_default_pending_expedia",
+        "spread_business_wtp_extra": "user_spec_default_pending_expedia",
+        "spread_sigma": "user_spec_default_pending_expedia",
+        "spread_beta": "user_spec_default_pending_expedia",
+        "spread_cancel": "user_spec_default_pending_expedia",
+        "spread_cost": "user_spec_default_pending_expedia",
+        "spread_room_size": "user_spec_default_pending_expedia",
+        "spread_room_count": "user_spec_default_pending_expedia",
+        "arrival_weights": "hotel_booking_demand_lead_time",
+        "season_multipliers": "hotel_booking_demand_arrival_dates",
+        "dow_multipliers": "hotel_booking_demand_arrival_dates"
+      },
+      "beta_calibration": {
+        "leisure": {
+          "status": "estimated_proxy",
+          "beta": 0.693994402609182,
+          "source": "hotel_booking_demand_room_type_adr_proxy",
+          "room_type_codes_small_to_large": [
+            "A",
+            "E",
+            "D"
+          ],
+          "median_adr_by_code": [
+            90.0,
+            115.05,
+            122.4
+          ],
+          "assumed_room_sizes_m2_small_to_large": [
+            18.0,
+            24.0,
+            32.0
+          ],
+          "pairwise_beta_values": [
+            0.8535712498813018,
+            0.5344175553370623
+          ]
+        },
+        "business": {
+          "status": "estimated_proxy",
+          "beta": 1.084557561225355,
+          "source": "hotel_booking_demand_room_type_adr_proxy",
+          "room_type_codes_small_to_large": [
+            "A",
+            "D",
+            "E"
+          ],
+          "median_adr_by_code": [
+            65.0,
+            95.0,
+            106.0
+          ],
+          "assumed_room_sizes_m2_small_to_large": [
+            18.0,
+            24.0,
+            32.0
+          ],
+          "pairwise_beta_values": [
+            1.319128503457618,
+            0.8499866189930921
+          ]
+        }
+      },
+      "expedia_calibration": {
+        "reference_price_source": "user_spec_default_thb",
+        "reference_price_usd": null,
+        "logistic_status": "not_fitted",
+        "hotel_spread_source": "user_spec_default_spreads",
+        "hotel_log_price_spread": null
+      },
+      "arrival_weights": {
+        "leisure": [
+          0.23973041383306395,
+          0.05059315055960477,
+          0.04333506144978805,
+          0.041139337013204845,
+          0.03625994937635327,
+          0.03366777469427587,
+          0.03363727852154555,
+          0.02991674544844622,
+          0.026714647311762374,
+          0.026257204720807538,
+          0.028513921502851394,
+          0.028300448293739136,
+          0.02174377115671983,
+          0.026958616693604952,
+          0.022414686956786924,
+          0.025433808057088836,
+          0.02454941904790949,
+          0.02366503003873014,
+          0.02406148028422433,
+          0.020767893629349516,
+          0.018938123265530175,
+          0.01936506968375469,
+          0.018145222774541794,
+          0.017596291665395992,
+          0.018541673020035985,
+          0.018755146229148242,
+          0.01863316153822695,
+          0.023329572138696592,
+          0.020188466347473392,
+          0.01884663474733921
+        ],
+        "business": [
+          0.2755868544600939,
+          0.07582159624413146,
+          0.07323943661971831,
+          0.06784037558685446,
+          0.07276995305164319,
+          0.06173708920187793,
+          0.045305164319248824,
+          0.03051643192488263,
+          0.019014084507042252,
+          0.022065727699530517,
+          0.02112676056338028,
+          0.0284037558685446,
+          0.021361502347417842,
+          0.01267605633802817,
+          0.018779342723004695,
+          0.021361502347417842,
+          0.013380281690140845,
+          0.008215962441314555,
+          0.008450704225352112,
+          0.013380281690140845,
+          0.009389671361502348,
+          0.010093896713615023,
+          0.005868544600938967,
+          0.01619718309859155,
+          0.007042253521126761,
+          0.00892018779342723,
+          0.006807511737089202,
+          0.00892018779342723,
+          0.010328638497652582,
+          0.00539906103286385
+        ]
+      },
+      "season_multipliers": {
+        "leisure": {
+          "low": 0.9730643236173208,
+          "shoulder": 1.097815365969058,
+          "high": 0.8879285341981814
+        },
+        "business": {
+          "low": 1.243652783673918,
+          "shoulder": 0.9442768306937483,
+          "high": 0.5321075031712724
+        }
+      },
+      "dow_multipliers": {
+        "weekday": {
+          "leisure": 0.9457424980764298,
+          "business": 1.1863078142632228
+        },
+        "weekend": {
+          "leisure": 1.1361239096932048,
+          "business": 0.5325817226227993
+        }
+      }
+    },
+    "midscale": {
+      "id": 1,
+      "stars": 4,
+      "reference_price_thb": 2500,
+      "business_share": 0.3,
+      "demand_per_room_episode": 2.7,
+      "variable_cost_thb": 450,
+      "ota_share_leisure": 0.8634290843806104,
+      "ota_share_business": 0.06302829841969863,
+      "segments": {
+        "leisure": {
+          "wtp_median_reference": 0.85,
+          "wtp_sigma": 0.4527371205598404,
+          "size_beta": 0.6794815054819312,
+          "cancel_base": 0.36300278591006724,
+          "size_beta_source": "hotel_booking_demand_room_type_adr_proxy",
+          "sources": {
+            "wtp_median_reference": "user_spec_default_no_star_tier_currency_mapping",
+            "wtp_sigma": "hotel_booking_demand_log_adr_std",
+            "size_beta": "hotel_booking_demand_room_type_adr_proxy",
+            "cancel_base": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          },
+          "wtp_calibration": {
+            "mu_log_adr": 4.550300247027503,
+            "sigma_log_adr": 0.4527371205598404,
+            "geometric_mean_adr_source_currency": 94.66082568012735,
+            "observation_count": 111400
+          },
+          "cancellation_calibration": {
+            "pooled_hbd_model": {
+              "status": "fitted",
+              "observation_count": 32791,
+              "cancel_rate": 0.19743222225610685,
+              "cancel_base": 0.3549360573342879,
+              "deposit_shares": {
+                "No Deposit": 0.9830136317892104,
+                "Non Refund": 0.015949498337958588,
+                "Refundable": 0.0010368698728309598
+              },
+              "logistic": {
+                "intercept": -0.6333056814785878,
+                "coefficients": {
+                  "lead_time_scaled": 1.8830148817741261,
+                  "deposit_type=No Deposit": -1.6063875419217006,
+                  "deposit_type=Non Refund": 2.508633762520774,
+                  "deposit_type=Refundable": -1.4900053145986798
+                },
+                "feature_names": [
+                  "lead_time_scaled",
+                  "deposit_type=No Deposit",
+                  "deposit_type=Non Refund",
+                  "deposit_type=Refundable"
+                ],
+                "roc_auc_in_sample": 0.7017725057677932,
+                "log_loss_in_sample": 0.44766369609683554
+              },
+              "predicted_cancel_rate_by_days_remaining": [
+                0.11417113106661918,
+                0.12007189257202071,
+                0.12626000174562438,
+                0.13274540715510766,
+                0.1395378085101721,
+                0.1466465743006126,
+                0.15408065320352712,
+                0.16184847953621712,
+                0.16995787317809508,
+                0.1784159345476474,
+                0.18722893539744864,
+                0.19640220637875774,
+                0.20594002252378069,
+                0.21584548799367836,
+                0.2261204216382399,
+                0.23676524510226163,
+                0.24777887538661444,
+                0.2591586239205932,
+                0.2709001043177997,
+                0.2829971510617599,
+                0.295441751391224,
+                0.3082239926208831,
+                0.3213320270345183,
+                0.3347520563195913,
+                0.34846833727248977,
+                0.3624632101922231,
+                0.3767171510006318,
+                0.39120884768568476,
+                0.40591530117113256,
+                0.4208119501838077
+              ]
+            },
+            "tier_default_scale": 1.2100092863668908,
+            "source": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          }
+        },
+        "business": {
+          "wtp_median_reference": 1.55,
+          "wtp_sigma": 0.4508752553222641,
+          "size_beta": 1.0600826322147516,
+          "cancel_base": 0.2205107352315233,
+          "size_beta_source": "hotel_booking_demand_room_type_adr_proxy",
+          "sources": {
+            "wtp_median_reference": "user_spec_default_no_star_tier_currency_mapping",
+            "wtp_sigma": "hotel_booking_demand_log_adr_std",
+            "size_beta": "hotel_booking_demand_room_type_adr_proxy",
+            "cancel_base": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          },
+          "wtp_calibration": {
+            "mu_log_adr": 4.179123645111834,
+            "sigma_log_adr": 0.4508752553222641,
+            "geometric_mean_adr_source_currency": 65.30859462211465,
+            "observation_count": 5442
+          },
+          "cancellation_calibration": {
+            "pooled_hbd_model": {
+              "status": "fitted",
+              "observation_count": 4260,
+              "cancel_rate": 0.12230046948356807,
+              "cancel_base": 0.22786109307257407,
+              "deposit_shares": {
+                "No Deposit": 0.9786384976525822,
+                "Non Refund": 0.021361502347417842
+              },
+              "logistic": {
+                "intercept": -0.39856078639034637,
+                "coefficients": {
+                  "lead_time_scaled": 1.251539594716773,
+                  "deposit_type=No Deposit": -2.066886825200953,
+                  "deposit_type=Non Refund": 1.7380986349819674
+                },
+                "feature_names": [
+                  "lead_time_scaled",
+                  "deposit_type=No Deposit",
+                  "deposit_type=Non Refund"
+                ],
+                "roc_auc_in_sample": 0.6558721963184138,
+                "log_loss_in_sample": 0.33314023323374653
+              },
+              "predicted_cancel_rate_by_days_remaining": [
+                0.09671453452225902,
+                0.09996169646104838,
+                0.10331484445984544,
+                0.10677694690775197,
+                0.11035098476203413,
+                0.11403994468948887,
+                0.11784681168340908,
+                0.12177456114543278,
+                0.1258261504237421,
+                0.13000450980162634,
+                0.1343125329333623,
+                0.1387530667277165,
+                0.14332890068314164,
+                0.14804275568294706,
+                0.15289727226336455,
+                0.15789499837250848,
+                0.16303837664373927,
+                0.16832973121285713,
+                0.17377125411486247,
+                0.17936499130268382,
+                0.18511282833724618,
+                0.19101647580548653,
+                0.19707745453034403,
+                0.20329708064428922,
+                0.20967645060552137,
+                0.2162164262434485,
+                0.22291761992737236,
+                0.22978037995929615,
+                0.23680477629833732,
+                0.243990586730214
+              ]
+            },
+            "tier_default_scale": 2.205107352315233,
+            "source": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          }
+        }
+      },
+      "rooms": [
+        {
+          "name": "Standard",
+          "size_m2": 26,
+          "count": 22,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        },
+        {
+          "name": "Deluxe",
+          "size_m2": 34,
+          "count": 12,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        },
+        {
+          "name": "Suite",
+          "size_m2": 52,
+          "count": 6,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        }
+      ],
+      "spreads": {
+        "reference_price": 0.15,
+        "demand": 0.2,
+        "wtp": 0.1,
+        "business_wtp_extra": 0.05,
+        "sigma": 0.2,
+        "beta": 0.15,
+        "cancel": 0.25,
+        "cost": 0.15,
+        "room_size": 0.12,
+        "room_count": 0.3
+      },
+      "sources": {
+        "profile": "user_spec_default",
+        "spreads": "user_spec_default",
+        "business_share": "user_spec_default_no_star_tier_mapping",
+        "room_types": "user_spec_default",
+        "reference_price": "user_spec_default",
+        "variable_cost": "user_spec_default",
+        "reference_price_usd": "expedia_unavailable_user_spec_default",
+        "reference_price_spread": "expedia_unavailable_user_spec_default",
+        "logistic_price_response": "expedia_unavailable_not_fitted",
+        "reference_price_thb": "user_spec_default",
+        "demand_per_room_episode": "user_spec_default",
+        "variable_cost_thb": "user_spec_default",
+        "ota_share_leisure": "hotel_booking_demand_distribution_channel",
+        "ota_share_business": "hotel_booking_demand_distribution_channel",
+        "rooms": "user_spec_default",
+        "spread_reference_price": "user_spec_default_pending_expedia",
+        "spread_demand": "user_spec_default_pending_expedia",
+        "spread_wtp": "user_spec_default_pending_expedia",
+        "spread_business_wtp_extra": "user_spec_default_pending_expedia",
+        "spread_sigma": "user_spec_default_pending_expedia",
+        "spread_beta": "user_spec_default_pending_expedia",
+        "spread_cancel": "user_spec_default_pending_expedia",
+        "spread_cost": "user_spec_default_pending_expedia",
+        "spread_room_size": "user_spec_default_pending_expedia",
+        "spread_room_count": "user_spec_default_pending_expedia",
+        "arrival_weights": "hotel_booking_demand_lead_time",
+        "season_multipliers": "hotel_booking_demand_arrival_dates",
+        "dow_multipliers": "hotel_booking_demand_arrival_dates"
+      },
+      "beta_calibration": {
+        "leisure": {
+          "status": "estimated_proxy",
+          "beta": 0.6794815054819312,
+          "source": "hotel_booking_demand_room_type_adr_proxy",
+          "room_type_codes_small_to_large": [
+            "A",
+            "E",
+            "D"
+          ],
+          "median_adr_by_code": [
+            90.0,
+            115.05,
+            122.4
+          ],
+          "assumed_room_sizes_m2_small_to_large": [
+            26.0,
+            34.0,
+            52.0
+          ],
+          "pairwise_beta_values": [
+            0.9153563594882477,
+            0.44360665147561484
+          ]
+        },
+        "business": {
+          "status": "estimated_proxy",
+          "beta": 1.0600826322147516,
+          "source": "hotel_booking_demand_room_type_adr_proxy",
+          "room_type_codes_small_to_large": [
+            "A",
+            "D",
+            "E"
+          ],
+          "median_adr_by_code": [
+            65.0,
+            95.0,
+            106.0
+          ],
+          "assumed_room_sizes_m2_small_to_large": [
+            26.0,
+            34.0,
+            52.0
+          ],
+          "pairwise_beta_values": [
+            1.4146126228947584,
+            0.7055526415347446
+          ]
+        }
+      },
+      "expedia_calibration": {
+        "reference_price_source": "user_spec_default_thb",
+        "reference_price_usd": null,
+        "logistic_status": "not_fitted",
+        "hotel_spread_source": "user_spec_default_spreads",
+        "hotel_log_price_spread": null
+      },
+      "arrival_weights": {
+        "leisure": [
+          0.23973041383306395,
+          0.05059315055960477,
+          0.04333506144978805,
+          0.041139337013204845,
+          0.03625994937635327,
+          0.03366777469427587,
+          0.03363727852154555,
+          0.02991674544844622,
+          0.026714647311762374,
+          0.026257204720807538,
+          0.028513921502851394,
+          0.028300448293739136,
+          0.02174377115671983,
+          0.026958616693604952,
+          0.022414686956786924,
+          0.025433808057088836,
+          0.02454941904790949,
+          0.02366503003873014,
+          0.02406148028422433,
+          0.020767893629349516,
+          0.018938123265530175,
+          0.01936506968375469,
+          0.018145222774541794,
+          0.017596291665395992,
+          0.018541673020035985,
+          0.018755146229148242,
+          0.01863316153822695,
+          0.023329572138696592,
+          0.020188466347473392,
+          0.01884663474733921
+        ],
+        "business": [
+          0.2755868544600939,
+          0.07582159624413146,
+          0.07323943661971831,
+          0.06784037558685446,
+          0.07276995305164319,
+          0.06173708920187793,
+          0.045305164319248824,
+          0.03051643192488263,
+          0.019014084507042252,
+          0.022065727699530517,
+          0.02112676056338028,
+          0.0284037558685446,
+          0.021361502347417842,
+          0.01267605633802817,
+          0.018779342723004695,
+          0.021361502347417842,
+          0.013380281690140845,
+          0.008215962441314555,
+          0.008450704225352112,
+          0.013380281690140845,
+          0.009389671361502348,
+          0.010093896713615023,
+          0.005868544600938967,
+          0.01619718309859155,
+          0.007042253521126761,
+          0.00892018779342723,
+          0.006807511737089202,
+          0.00892018779342723,
+          0.010328638497652582,
+          0.00539906103286385
+        ]
+      },
+      "season_multipliers": {
+        "leisure": {
+          "low": 0.9730643236173208,
+          "shoulder": 1.097815365969058,
+          "high": 0.8879285341981814
+        },
+        "business": {
+          "low": 1.243652783673918,
+          "shoulder": 0.9442768306937483,
+          "high": 0.5321075031712724
+        }
+      },
+      "dow_multipliers": {
+        "weekday": {
+          "leisure": 0.9457424980764298,
+          "business": 1.1863078142632228
+        },
+        "weekend": {
+          "leisure": 1.1361239096932048,
+          "business": 0.5325817226227993
+        }
+      }
+    },
+    "luxury": {
+      "id": 2,
+      "stars": 5,
+      "reference_price_thb": 6000,
+      "business_share": 0.35,
+      "demand_per_room_episode": 2.5,
+      "variable_cost_thb": 900,
+      "ota_share_leisure": 0.8634290843806104,
+      "ota_share_business": 0.06302829841969863,
+      "segments": {
+        "leisure": {
+          "wtp_median_reference": 0.92,
+          "wtp_sigma": 0.4527371205598404,
+          "size_beta": 0.5895100844739062,
+          "cancel_base": 0.24200185727337817,
+          "size_beta_source": "hotel_booking_demand_room_type_adr_proxy",
+          "sources": {
+            "wtp_median_reference": "user_spec_default_no_star_tier_currency_mapping",
+            "wtp_sigma": "hotel_booking_demand_log_adr_std",
+            "size_beta": "hotel_booking_demand_room_type_adr_proxy",
+            "cancel_base": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          },
+          "wtp_calibration": {
+            "mu_log_adr": 4.550300247027503,
+            "sigma_log_adr": 0.4527371205598404,
+            "geometric_mean_adr_source_currency": 94.66082568012735,
+            "observation_count": 111400
+          },
+          "cancellation_calibration": {
+            "pooled_hbd_model": {
+              "status": "fitted",
+              "observation_count": 32791,
+              "cancel_rate": 0.19743222225610685,
+              "cancel_base": 0.3549360573342879,
+              "deposit_shares": {
+                "No Deposit": 0.9830136317892104,
+                "Non Refund": 0.015949498337958588,
+                "Refundable": 0.0010368698728309598
+              },
+              "logistic": {
+                "intercept": -0.6333056814785878,
+                "coefficients": {
+                  "lead_time_scaled": 1.8830148817741261,
+                  "deposit_type=No Deposit": -1.6063875419217006,
+                  "deposit_type=Non Refund": 2.508633762520774,
+                  "deposit_type=Refundable": -1.4900053145986798
+                },
+                "feature_names": [
+                  "lead_time_scaled",
+                  "deposit_type=No Deposit",
+                  "deposit_type=Non Refund",
+                  "deposit_type=Refundable"
+                ],
+                "roc_auc_in_sample": 0.7017725057677932,
+                "log_loss_in_sample": 0.44766369609683554
+              },
+              "predicted_cancel_rate_by_days_remaining": [
+                0.11417113106661918,
+                0.12007189257202071,
+                0.12626000174562438,
+                0.13274540715510766,
+                0.1395378085101721,
+                0.1466465743006126,
+                0.15408065320352712,
+                0.16184847953621712,
+                0.16995787317809508,
+                0.1784159345476474,
+                0.18722893539744864,
+                0.19640220637875774,
+                0.20594002252378069,
+                0.21584548799367836,
+                0.2261204216382399,
+                0.23676524510226163,
+                0.24777887538661444,
+                0.2591586239205932,
+                0.2709001043177997,
+                0.2829971510617599,
+                0.295441751391224,
+                0.3082239926208831,
+                0.3213320270345183,
+                0.3347520563195913,
+                0.34846833727248977,
+                0.3624632101922231,
+                0.3767171510006318,
+                0.39120884768568476,
+                0.40591530117113256,
+                0.4208119501838077
+              ]
+            },
+            "tier_default_scale": 1.2100092863668908,
+            "source": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          }
+        },
+        "business": {
+          "wtp_median_reference": 1.65,
+          "wtp_sigma": 0.4508752553222641,
+          "size_beta": 0.920234749819703,
+          "cancel_base": 0.13230644113891396,
+          "size_beta_source": "hotel_booking_demand_room_type_adr_proxy",
+          "sources": {
+            "wtp_median_reference": "user_spec_default_no_star_tier_currency_mapping",
+            "wtp_sigma": "hotel_booking_demand_log_adr_std",
+            "size_beta": "hotel_booking_demand_room_type_adr_proxy",
+            "cancel_base": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          },
+          "wtp_calibration": {
+            "mu_log_adr": 4.179123645111834,
+            "sigma_log_adr": 0.4508752553222641,
+            "geometric_mean_adr_source_currency": 65.30859462211465,
+            "observation_count": 5442
+          },
+          "cancellation_calibration": {
+            "pooled_hbd_model": {
+              "status": "fitted",
+              "observation_count": 4260,
+              "cancel_rate": 0.12230046948356807,
+              "cancel_base": 0.22786109307257407,
+              "deposit_shares": {
+                "No Deposit": 0.9786384976525822,
+                "Non Refund": 0.021361502347417842
+              },
+              "logistic": {
+                "intercept": -0.39856078639034637,
+                "coefficients": {
+                  "lead_time_scaled": 1.251539594716773,
+                  "deposit_type=No Deposit": -2.066886825200953,
+                  "deposit_type=Non Refund": 1.7380986349819674
+                },
+                "feature_names": [
+                  "lead_time_scaled",
+                  "deposit_type=No Deposit",
+                  "deposit_type=Non Refund"
+                ],
+                "roc_auc_in_sample": 0.6558721963184138,
+                "log_loss_in_sample": 0.33314023323374653
+              },
+              "predicted_cancel_rate_by_days_remaining": [
+                0.09671453452225902,
+                0.09996169646104838,
+                0.10331484445984544,
+                0.10677694690775197,
+                0.11035098476203413,
+                0.11403994468948887,
+                0.11784681168340908,
+                0.12177456114543278,
+                0.1258261504237421,
+                0.13000450980162634,
+                0.1343125329333623,
+                0.1387530667277165,
+                0.14332890068314164,
+                0.14804275568294706,
+                0.15289727226336455,
+                0.15789499837250848,
+                0.16303837664373927,
+                0.16832973121285713,
+                0.17377125411486247,
+                0.17936499130268382,
+                0.18511282833724618,
+                0.19101647580548653,
+                0.19707745453034403,
+                0.20329708064428922,
+                0.20967645060552137,
+                0.2162164262434485,
+                0.22291761992737236,
+                0.22978037995929615,
+                0.23680477629833732,
+                0.243990586730214
+              ]
+            },
+            "tier_default_scale": 2.205107352315233,
+            "source": "hotel_booking_demand_logistic_scaled_to_tier_default"
+          }
+        }
+      },
+      "rooms": [
+        {
+          "name": "Deluxe",
+          "size_m2": 40,
+          "count": 13,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        },
+        {
+          "name": "Premier",
+          "size_m2": 55,
+          "count": 8,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        },
+        {
+          "name": "Suite",
+          "size_m2": 85,
+          "count": 4,
+          "sources": {
+            "size_m2": "user_spec_default",
+            "count": "user_spec_default"
+          }
+        }
+      ],
+      "spreads": {
+        "reference_price": 0.15,
+        "demand": 0.2,
+        "wtp": 0.1,
+        "business_wtp_extra": 0.05,
+        "sigma": 0.2,
+        "beta": 0.15,
+        "cancel": 0.25,
+        "cost": 0.15,
+        "room_size": 0.12,
+        "room_count": 0.3
+      },
+      "sources": {
+        "profile": "user_spec_default",
+        "spreads": "user_spec_default",
+        "business_share": "user_spec_default_no_star_tier_mapping",
+        "room_types": "user_spec_default",
+        "reference_price": "user_spec_default",
+        "variable_cost": "user_spec_default",
+        "reference_price_usd": "expedia_unavailable_user_spec_default",
+        "reference_price_spread": "expedia_unavailable_user_spec_default",
+        "logistic_price_response": "expedia_unavailable_not_fitted",
+        "reference_price_thb": "user_spec_default",
+        "demand_per_room_episode": "user_spec_default",
+        "variable_cost_thb": "user_spec_default",
+        "ota_share_leisure": "hotel_booking_demand_distribution_channel",
+        "ota_share_business": "hotel_booking_demand_distribution_channel",
+        "rooms": "user_spec_default",
+        "spread_reference_price": "user_spec_default_pending_expedia",
+        "spread_demand": "user_spec_default_pending_expedia",
+        "spread_wtp": "user_spec_default_pending_expedia",
+        "spread_business_wtp_extra": "user_spec_default_pending_expedia",
+        "spread_sigma": "user_spec_default_pending_expedia",
+        "spread_beta": "user_spec_default_pending_expedia",
+        "spread_cancel": "user_spec_default_pending_expedia",
+        "spread_cost": "user_spec_default_pending_expedia",
+        "spread_room_size": "user_spec_default_pending_expedia",
+        "spread_room_count": "user_spec_default_pending_expedia",
+        "arrival_weights": "hotel_booking_demand_lead_time",
+        "season_multipliers": "hotel_booking_demand_arrival_dates",
+        "dow_multipliers": "hotel_booking_demand_arrival_dates"
+      },
+      "beta_calibration": {
+        "leisure": {
+          "status": "estimated_proxy",
+          "beta": 0.5895100844739062,
+          "source": "hotel_booking_demand_room_type_adr_proxy",
+          "room_type_codes_small_to_large": [
+            "A",
+            "E",
+            "D"
+          ],
+          "median_adr_by_code": [
+            90.0,
+            115.05,
+            122.4
+          ],
+          "assumed_room_sizes_m2_small_to_large": [
+            40.0,
+            55.0,
+            85.0
+          ],
+          "pairwise_beta_values": [
+            0.771092068190304,
+            0.4079281007575084
+          ]
+        },
+        "business": {
+          "status": "estimated_proxy",
+          "beta": 0.920234749819703,
+          "source": "hotel_booking_demand_room_type_adr_proxy",
+          "room_type_codes_small_to_large": [
+            "A",
+            "D",
+            "E"
+          ],
+          "median_adr_by_code": [
+            65.0,
+            95.0,
+            106.0
+          ],
+          "assumed_room_sizes_m2_small_to_large": [
+            40.0,
+            55.0,
+            85.0
+          ],
+          "pairwise_beta_values": [
+            1.1916632924098176,
+            0.6488062072295883
+          ]
+        }
+      },
+      "expedia_calibration": {
+        "reference_price_source": "user_spec_default_thb",
+        "reference_price_usd": null,
+        "logistic_status": "not_fitted",
+        "hotel_spread_source": "user_spec_default_spreads",
+        "hotel_log_price_spread": null
+      },
+      "arrival_weights": {
+        "leisure": [
+          0.23973041383306395,
+          0.05059315055960477,
+          0.04333506144978805,
+          0.041139337013204845,
+          0.03625994937635327,
+          0.03366777469427587,
+          0.03363727852154555,
+          0.02991674544844622,
+          0.026714647311762374,
+          0.026257204720807538,
+          0.028513921502851394,
+          0.028300448293739136,
+          0.02174377115671983,
+          0.026958616693604952,
+          0.022414686956786924,
+          0.025433808057088836,
+          0.02454941904790949,
+          0.02366503003873014,
+          0.02406148028422433,
+          0.020767893629349516,
+          0.018938123265530175,
+          0.01936506968375469,
+          0.018145222774541794,
+          0.017596291665395992,
+          0.018541673020035985,
+          0.018755146229148242,
+          0.01863316153822695,
+          0.023329572138696592,
+          0.020188466347473392,
+          0.01884663474733921
+        ],
+        "business": [
+          0.2755868544600939,
+          0.07582159624413146,
+          0.07323943661971831,
+          0.06784037558685446,
+          0.07276995305164319,
+          0.06173708920187793,
+          0.045305164319248824,
+          0.03051643192488263,
+          0.019014084507042252,
+          0.022065727699530517,
+          0.02112676056338028,
+          0.0284037558685446,
+          0.021361502347417842,
+          0.01267605633802817,
+          0.018779342723004695,
+          0.021361502347417842,
+          0.013380281690140845,
+          0.008215962441314555,
+          0.008450704225352112,
+          0.013380281690140845,
+          0.009389671361502348,
+          0.010093896713615023,
+          0.005868544600938967,
+          0.01619718309859155,
+          0.007042253521126761,
+          0.00892018779342723,
+          0.006807511737089202,
+          0.00892018779342723,
+          0.010328638497652582,
+          0.00539906103286385
+        ]
+      },
+      "season_multipliers": {
+        "leisure": {
+          "low": 0.9730643236173208,
+          "shoulder": 1.097815365969058,
+          "high": 0.8879285341981814
+        },
+        "business": {
+          "low": 1.243652783673918,
+          "shoulder": 0.9442768306937483,
+          "high": 0.5321075031712724
+        }
+      },
+      "dow_multipliers": {
+        "weekday": {
+          "leisure": 0.9457424980764298,
+          "business": 1.1863078142632228
+        },
+        "weekend": {
+          "leisure": 1.1361239096932048,
+          "business": 0.5325817226227993
+        }
+      }
+    }
+  },
+  "calibration": {
+    "hotel_booking_demand": {
+      "status": "estimated_room_size_beta_proxy",
+      "mapping_selection": "most_frequent_overall",
+      "size_ordering": "segment_median_adr_ascending",
+      "pairwise_beta_aggregation": "median",
+      "mapping_count": 3,
+      "mapping_by_tier_and_segment": {
+        "budget:leisure": [
+          "A",
+          "E",
+          "D"
+        ],
+        "budget:business": [
+          "A",
+          "D",
+          "E"
+        ],
+        "midscale:leisure": [
+          "A",
+          "E",
+          "D"
+        ],
+        "midscale:business": [
+          "A",
+          "D",
+          "E"
+        ],
+        "luxury:leisure": [
+          "A",
+          "E",
+          "D"
+        ],
+        "luxury:business": [
+          "A",
+          "D",
+          "E"
+        ]
+      },
+      "data_has_room_area_or_star_tier": false
+    },
+    "expedia": {
+      "source": "expedia_personalized_sort",
+      "status": "unavailable_no_local_data",
+      "reason": "Kaggle competition data requires authenticated rule acceptance; defaults retained.",
+      "tiers": {
+        "budget": {
+          "reference_price_source": "user_spec_default_thb",
+          "reference_price_usd": null,
+          "logistic_status": "not_fitted",
+          "hotel_spread_source": "user_spec_default_spreads",
+          "hotel_log_price_spread": null
+        },
+        "midscale": {
+          "reference_price_source": "user_spec_default_thb",
+          "reference_price_usd": null,
+          "logistic_status": "not_fitted",
+          "hotel_spread_source": "user_spec_default_spreads",
+          "hotel_log_price_spread": null
+        },
+        "luxury": {
+          "reference_price_source": "user_spec_default_thb",
+          "reference_price_usd": null,
+          "logistic_status": "not_fitted",
+          "hotel_spread_source": "user_spec_default_spreads",
+          "hotel_log_price_spread": null
+        }
+      }
+    },
+    "customer": {
+      "arrival_weights_by_segment": {
+        "leisure": [
+          0.23973041383306395,
+          0.05059315055960477,
+          0.04333506144978805,
+          0.041139337013204845,
+          0.03625994937635327,
+          0.03366777469427587,
+          0.03363727852154555,
+          0.02991674544844622,
+          0.026714647311762374,
+          0.026257204720807538,
+          0.028513921502851394,
+          0.028300448293739136,
+          0.02174377115671983,
+          0.026958616693604952,
+          0.022414686956786924,
+          0.025433808057088836,
+          0.02454941904790949,
+          0.02366503003873014,
+          0.02406148028422433,
+          0.020767893629349516,
+          0.018938123265530175,
+          0.01936506968375469,
+          0.018145222774541794,
+          0.017596291665395992,
+          0.018541673020035985,
+          0.018755146229148242,
+          0.01863316153822695,
+          0.023329572138696592,
+          0.020188466347473392,
+          0.01884663474733921
+        ],
+        "business": [
+          0.2755868544600939,
+          0.07582159624413146,
+          0.07323943661971831,
+          0.06784037558685446,
+          0.07276995305164319,
+          0.06173708920187793,
+          0.045305164319248824,
+          0.03051643192488263,
+          0.019014084507042252,
+          0.022065727699530517,
+          0.02112676056338028,
+          0.0284037558685446,
+          0.021361502347417842,
+          0.01267605633802817,
+          0.018779342723004695,
+          0.021361502347417842,
+          0.013380281690140845,
+          0.008215962441314555,
+          0.008450704225352112,
+          0.013380281690140845,
+          0.009389671361502348,
+          0.010093896713615023,
+          0.005868544600938967,
+          0.01619718309859155,
+          0.007042253521126761,
+          0.00892018779342723,
+          0.006807511737089202,
+          0.00892018779342723,
+          0.010328638497652582,
+          0.00539906103286385
+        ]
+      },
+      "wtp_lognormal_by_segment": {
+        "leisure": {
+          "mu_log_adr": 4.550300247027503,
+          "sigma_log_adr": 0.4527371205598404,
+          "geometric_mean_adr_source_currency": 94.66082568012735,
+          "observation_count": 111400
+        },
+        "business": {
+          "mu_log_adr": 4.179123645111834,
+          "sigma_log_adr": 0.4508752553222641,
+          "geometric_mean_adr_source_currency": 65.30859462211465,
+          "observation_count": 5442
+        }
+      },
+      "cancellation_logistic_by_segment": {
+        "leisure": {
+          "status": "fitted",
+          "observation_count": 32791,
+          "cancel_rate": 0.19743222225610685,
+          "cancel_base": 0.3549360573342879,
+          "deposit_shares": {
+            "No Deposit": 0.9830136317892104,
+            "Non Refund": 0.015949498337958588,
+            "Refundable": 0.0010368698728309598
+          },
+          "logistic": {
+            "intercept": -0.6333056814785878,
+            "coefficients": {
+              "lead_time_scaled": 1.8830148817741261,
+              "deposit_type=No Deposit": -1.6063875419217006,
+              "deposit_type=Non Refund": 2.508633762520774,
+              "deposit_type=Refundable": -1.4900053145986798
+            },
+            "feature_names": [
+              "lead_time_scaled",
+              "deposit_type=No Deposit",
+              "deposit_type=Non Refund",
+              "deposit_type=Refundable"
+            ],
+            "roc_auc_in_sample": 0.7017725057677932,
+            "log_loss_in_sample": 0.44766369609683554
+          },
+          "predicted_cancel_rate_by_days_remaining": [
+            0.11417113106661918,
+            0.12007189257202071,
+            0.12626000174562438,
+            0.13274540715510766,
+            0.1395378085101721,
+            0.1466465743006126,
+            0.15408065320352712,
+            0.16184847953621712,
+            0.16995787317809508,
+            0.1784159345476474,
+            0.18722893539744864,
+            0.19640220637875774,
+            0.20594002252378069,
+            0.21584548799367836,
+            0.2261204216382399,
+            0.23676524510226163,
+            0.24777887538661444,
+            0.2591586239205932,
+            0.2709001043177997,
+            0.2829971510617599,
+            0.295441751391224,
+            0.3082239926208831,
+            0.3213320270345183,
+            0.3347520563195913,
+            0.34846833727248977,
+            0.3624632101922231,
+            0.3767171510006318,
+            0.39120884768568476,
+            0.40591530117113256,
+            0.4208119501838077
+          ]
+        },
+        "business": {
+          "status": "fitted",
+          "observation_count": 4260,
+          "cancel_rate": 0.12230046948356807,
+          "cancel_base": 0.22786109307257407,
+          "deposit_shares": {
+            "No Deposit": 0.9786384976525822,
+            "Non Refund": 0.021361502347417842
+          },
+          "logistic": {
+            "intercept": -0.39856078639034637,
+            "coefficients": {
+              "lead_time_scaled": 1.251539594716773,
+              "deposit_type=No Deposit": -2.066886825200953,
+              "deposit_type=Non Refund": 1.7380986349819674
+            },
+            "feature_names": [
+              "lead_time_scaled",
+              "deposit_type=No Deposit",
+              "deposit_type=Non Refund"
+            ],
+            "roc_auc_in_sample": 0.6558721963184138,
+            "log_loss_in_sample": 0.33314023323374653
+          },
+          "predicted_cancel_rate_by_days_remaining": [
+            0.09671453452225902,
+            0.09996169646104838,
+            0.10331484445984544,
+            0.10677694690775197,
+            0.11035098476203413,
+            0.11403994468948887,
+            0.11784681168340908,
+            0.12177456114543278,
+            0.1258261504237421,
+            0.13000450980162634,
+            0.1343125329333623,
+            0.1387530667277165,
+            0.14332890068314164,
+            0.14804275568294706,
+            0.15289727226336455,
+            0.15789499837250848,
+            0.16303837664373927,
+            0.16832973121285713,
+            0.17377125411486247,
+            0.17936499130268382,
+            0.18511282833724618,
+            0.19101647580548653,
+            0.19707745453034403,
+            0.20329708064428922,
+            0.20967645060552137,
+            0.2162164262434485,
+            0.22291761992737236,
+            0.22978037995929615,
+            0.23680477629833732,
+            0.243990586730214
+          ]
+        }
+      },
+      "ota_share_by_segment": {
+        "business": 0.06302829841969863,
+        "leisure": 0.8634290843806104
+      },
+      "booking_share_by_segment": {
+        "business": 0.04657571763578165,
+        "leisure": 0.9534242823642184
+      },
+      "season_multipliers_by_segment": {
+        "leisure": {
+          "low": 0.9730643236173208,
+          "shoulder": 1.097815365969058,
+          "high": 0.8879285341981814
+        },
+        "business": {
+          "low": 1.243652783673918,
+          "shoulder": 0.9442768306937483,
+          "high": 0.5321075031712724
+        }
+      },
+      "dow_multipliers_by_segment": {
+        "weekday": {
+          "leisure": 0.9457424980764298,
+          "business": 1.1863078142632228
+        },
+        "weekend": {
+          "leisure": 1.1361239096932048,
+          "business": 0.5325817226227993
+        }
+      },
+      "conversion_rate_used_for_de_censoring": 0.35,
+      "conversion_rate_sensitivity": [
+        0.25,
+        0.35,
+        0.45
+      ],
+      "loco_metric_note": "Normalized 30-day lead-time curve; booking totals are de-censored by the configured conversion rate."
+    }
+  }
+}
