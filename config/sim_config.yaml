@@ -216,6 +216,8 @@ synthetic_hotels:
   seed: 777
   train_per_tier: 30
   test_per_tier: 10
+  validation_seed: 778
+  validation_per_tier: 10
   h_shift_standard_deviation_hours: 1.2
   amplitude:
     season_base: 1.0
@@ -253,6 +255,8 @@ rl:
   gamma: 1.0
   alpha_n_step_min: 0.003
   alpha_n_step_count_exponent: 0.7
+  occupancy_penalty_per_room: 0.0
+  occupancy_floor_margin: 0.03
   alpha_monte_carlo_min: 0.005
   epsilon_min: 0.03
   epsilon_decay_episode_fraction: 0.7
@@ -272,10 +276,12 @@ rl:
 evaluation:
   episodes_per_tier: 500
   seed_base: 9000
+  validation_seed_base: 19000
   seed_episode_multiplier: 7
   common_random_numbers: true
   test_hotel_pool: test
   model_variants:
+    final: models/q_table_final.npy
     n_step_domain_randomization: models/q_table_n_step_domain_randomization.npy
     n_step_single: models/q_table_n_step_single.npy
     monte_carlo_domain_randomization: models/q_table_monte_carlo_domain_randomization.npy

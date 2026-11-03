@@ -9,6 +9,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from src.baselines import FixedPolicy
 from src.config import PROJECT_ROOT, load_config
 from src.env import HotelPricingEnv
 from src.hotels import generate_hotel_population
@@ -20,13 +21,44 @@ def _project_path(path: str | Path) -> Path:
     return candidate if candidate.is_absolute() else PROJECT_ROOT / candidate
 
 
+def occupancy_penalties(
+    rooms_left: np.ndarray, capacity: int, target_occupancy: float, penalty_per_room_thb: float
+) -> np.ndarray:
+    """Terminal penalty for rooms sold below target, split by each room type's unsold rooms."""
+    rooms_left = np.asarray(rooms_left, dtype=float)
+    shortfall = max(0.0, target_occupancy * capacity - (capacity - rooms_left.sum()))
+    if shortfall == 0.0 or rooms_left.sum() == 0.0:
+        return np.zeros_like(rooms_left)
+    return penalty_per_room_thb * shortfall * rooms_left / rooms_left.sum()
+
+
+def _fixed_occupancy(hotel: Any, options: dict[str, Any], config: dict[str, Any]) -> float:
+    """Occupancy the Fixed baseline reaches on the same scenario."""
+    env = HotelPricingEnv(hotel=hotel, config=config)
+    env.reset(seed=options["scenario_seed"], options=options)
+    policy = FixedPolicy(config)
+    while True:
+        _, _, terminated, truncated, info = env.step(policy.select_actions(env))
+        if terminated or truncated:
+            return float(info["episode_metrics"]["occupancy"])
+
+
 def train_agent(
     config: dict[str, Any] | None = None,
     algorithm: str = "n_step",
     mode: str | None = None,
     episodes_per_tier: int | None = None,
+    learner: TabularQLearner | None = None,
+    tiers: list[str] | None = None,
+    behavior_policy: Any | None = None,
+    epsilon_start: float = 1.0,
 ) -> tuple[TabularQLearner, pd.DataFrame, Path]:
-    """Train one shared table, alternating tiers and sampling configured scenarios."""
+    """Train one shared table, alternating tiers and sampling configured scenarios.
+
+    Optional warm-start: pass an existing ``learner`` to continue its table, ``tiers`` to train
+    only those tier slices, and ``behavior_policy`` to take that policy's actions while the
+    learner updates from them (learning from demonstration).
+    """
     config = config or load_config()
     mode = mode or config["synthetic_hotels"]["domain_randomization_mode"]
     if mode not in {
@@ -35,16 +67,16 @@ def train_agent(
     }:
         raise ValueError(f"Unsupported hotel sampling mode: {mode}")
     episodes_per_tier = episodes_per_tier or config["rl"]["training_episodes_per_tier"]
-    total_episodes = episodes_per_tier * len(config["tiers"])
+    tier_names = tiers or list(config["tiers"])
+    total_episodes = episodes_per_tier * len(tier_names)
     seed = config["project"]["random_seed"]
     scenario_rng = np.random.default_rng(seed)
-    learner = TabularQLearner(config, algorithm=algorithm)
+    learner = learner or TabularQLearner(config, algorithm=algorithm)
     train_hotels, _ = generate_hotel_population(config, mode=mode)
     hotel_index_rng = np.random.default_rng(config["synthetic_hotels"]["seed"])
     base_hotel = train_hotels[next(iter(config["tiers"]))][0]
     env = HotelPricingEnv(hotel=base_hotel, config=config)
     episode_records: list[dict[str, Any]] = []
-    tier_names = list(config["tiers"])
     model_dir = _project_path(config["paths"]["models"])
     results_dir = _project_path(config["paths"]["results"])
     model_dir.mkdir(parents=True, exist_ok=True)
@@ -68,23 +100,29 @@ def train_agent(
             scenario_rng.random() < config["episode"]["weekend_probability"]
         )
         scenario_seed = seed + episode_index
-        env.reset(
-            seed=scenario_seed,
-            options={
-                "hotel": hotel,
-                "season": season,
-                "is_weekend": is_weekend,
-                "scenario_seed": scenario_seed,
-            },
+        options = {
+            "hotel": hotel,
+            "season": season,
+            "is_weekend": is_weekend,
+            "scenario_seed": scenario_seed,
+        }
+        env.reset(seed=scenario_seed, options=options)
+        penalty_rate = config["rl"]["occupancy_penalty_per_room"] * hotel.reference_price_thb
+        target_occupancy = (
+            _fixed_occupancy(hotel, options, config) - config["rl"]["occupancy_floor_margin"]
+            if penalty_rate > 0
+            else 0.0
         )
+        occupancy_penalty = 0.0
         learner.begin_episode()
-        epsilon = learner.epsilon(episode_index, total_episodes)
+        epsilon = learner.epsilon(episode_index, total_episodes, epsilon_start)
         episode_return = 0.0
 
         while True:
             cancellation_rewards, _ = env.prepare_step()
             for room_index, cancellation_reward in enumerate(cancellation_rewards):
                 learner.add_reward_to_last_transition(room_index, float(cancellation_reward))
+            behavior_actions = behavior_policy.select_actions(env) if behavior_policy else None
             actions = np.zeros(len(env.levels), dtype=np.int64)
             states = []
             decided_prices: list[float] = []
@@ -93,7 +131,10 @@ def train_agent(
                 lo, hi, _ = env.action_bounds(room_index, lower_price)
                 state = env.room_state(room_index)
                 learner.update_ready(room_index, state, lo, hi)
-                action = learner.choose_action(state, lo, hi, epsilon)
+                if behavior_actions is None:
+                    action = learner.choose_action(state, lo, hi, epsilon)
+                else:
+                    action = int(behavior_actions[room_index])
                 level, price, _, _ = env.resolve_room_action(room_index, action, lower_price)
                 actions[room_index] = level
                 states.append(state)
@@ -109,6 +150,13 @@ def train_agent(
                     info["per_room_rewards"][room_index] - cancellation_rewards[room_index],
                 )
             if terminated or truncated:
+                if penalty_rate > 0:
+                    penalties = occupancy_penalties(
+                        env.rooms_left, hotel.capacity, target_occupancy, penalty_rate
+                    )
+                    for room_index, penalty in enumerate(penalties):
+                        learner.add_reward_to_last_transition(room_index, -float(penalty))
+                    occupancy_penalty = float(penalties.sum())
                 learner.finish_episode()
                 break
 
@@ -125,6 +173,7 @@ def train_agent(
                 "epsilon": epsilon,
                 "net_profit": episode_return,
                 "normalized_profit": episode_return / normalization,
+                "occupancy_penalty": occupancy_penalty,
                 "capacity": hotel.capacity,
                 "reference_price_thb": hotel.reference_price_thb,
             }

@@ -72,10 +72,10 @@ class TabularQLearner:
         room_count = len(next(iter(self.config["tiers"].values()))["rooms"])
         self._episode_buffers = {room_index: [] for room_index in range(room_count)}
 
-    def epsilon(self, global_episode_index: int, total_episodes: int) -> float:
+    def epsilon(self, global_episode_index: int, total_episodes: int, start: float = 1.0) -> float:
         decay_fraction = self.config["rl"]["epsilon_decay_episode_fraction"]
         minimum = self.config["rl"]["epsilon_min"]
-        return max(minimum, 1.0 - global_episode_index / (decay_fraction * total_episodes))
+        return max(minimum, start * (1.0 - global_episode_index / (decay_fraction * total_episodes)))
 
     def choose_action(
         self,

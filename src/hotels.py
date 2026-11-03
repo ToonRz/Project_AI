@@ -241,6 +241,35 @@ def generate_hotel_population(
     return train, test
 
 
+def generate_validation_hotels(
+    config: dict[str, Any] | None = None,
+    profiles: dict[str, Any] | None = None,
+    mode: str | None = None,
+) -> dict[str, list[Hotel]]:
+    """Generate a tuning pool from its own seed so train/test draws stay unchanged."""
+    config = config or load_config()
+    if profiles is None:
+        with _project_path(config["paths"]["tier_profiles"]).open("r", encoding="utf-8") as stream:
+            profiles = json.load(stream)
+    rng = np.random.default_rng(config["synthetic_hotels"]["validation_seed"])
+    count = config["synthetic_hotels"]["validation_per_tier"]
+    return {
+        tier_name: [
+            sample_synthetic_hotel(
+                tier_name,
+                f"{tier_name}_validation_{index:02d}",
+                "validation",
+                rng,
+                config,
+                profiles,
+                mode,
+            )
+            for index in range(count)
+        ]
+        for tier_name in config["tiers"]
+    }
+
+
 def save_hotel_population(
     train: dict[str, list[Hotel]], test: dict[str, list[Hotel]], output_path: str | Path
 ) -> Path:

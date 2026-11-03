@@ -81,7 +81,17 @@ Streamlit ให้เลือก tier, season, weekday/weekend, โมเด�
 | Monte Carlo single | +1.52% | +20.24% | +22.48% |
 | Rule-based | +5.41% | +6.76% | +3.53% |
 
-ข้อเสนอจากผลนี้คือใช้ Rule-based กับ Budget และ RL กับ Midscale/Luxury; n-step DR เป็น policy หลักของ demo. Stress test ยืนยันว่า Rule-based ชนะ Budget ทั้ง 5 โลก, RL ชนะ Rule-based ใน Midscale 4/5 โลก (แพ้เล็กน้อยเมื่อ demand ต่ำ) และชนะทุกโลกใน Luxury. Sensitivity ต่อ conversion rate และ hotel spread ให้ทิศทางเดียวกัน: Rule-based เหมาะกับ Budget ส่วน RL ยังดีกว่า baseline ใน Midscale/Luxury.
+ข้อเสนอจากผลนี้คือใช้ Rule-based กับ Budget และ RL กับ Midscale/Luxury; n-step DR เป็น policy หลักของ demo.
+
+**อัปเดต 2026-11-03 · ตารางสุดท้าย** `models/q_table_final.npy` (คัดลอกเป็น `models/q_table.npy` ด้วย; ตารางเดิมยังอยู่ที่ `models/q_table_n_step_domain_randomization.npy`) เหมือน n-step DR ทุกค่าใน Budget/Midscale แต่ Luxury ฝึกใหม่โดยมีค่าปรับเมื่อ occupancy ต่ำกว่า Fixed − 3 จุด ผล test (`results/final/`, 500 episode/tier):
+
+| Tier | ใช้ | กำไรเทียบ Fixed | Occupancy | Conversion |
+|---|---|---:|---:|---:|
+| Budget | Rule-based | +5.41% | 78.0% | 50.9% |
+| Midscale | RL | +21.19% | 88.9% | 48.8% |
+| Luxury | RL (ตารางสุดท้าย) | +20.79% | 91.0% | 51.3% |
+
+Luxury ขายห้องได้ผ่านเกณฑ์แล้ว (เดิม 88.4%) โดยกำไรลดจาก +22.54% วิธีทดลอง เกณฑ์ และข้อจำกัดอยู่ใน [PLAN.md](PLAN.md) และ [ASSUMPTIONS.md](ASSUMPTIONS.md) Phase 7. หมายเหตุ: `python -m src.train` แบบ n-step DR จะบันทึกทับ `models/q_table.npy` ด้วยตารางที่ไม่มีค่าปรับ Stress test ยืนยันว่า Rule-based ชนะ Budget ทั้ง 5 โลก, RL ชนะ Rule-based ใน Midscale 4/5 โลก (แพ้เล็กน้อยเมื่อ demand ต่ำ) และชนะทุกโลกใน Luxury. Sensitivity ต่อ conversion rate และ hotel spread ให้ทิศทางเดียวกัน: Rule-based เหมาะกับ Budget ส่วน RL ยังดีกว่า baseline ใน Midscale/Luxury.
 
 กราฟและรายละเอียดอยู่ใน `results/phase6_main_kpis.csv`, `phase6_stress_kpis.csv`, `phase6_sensitivity_kpis.csv`, ไฟล์ heatmap ต่อ model และ `phase6_replay_*.csv`. ทุก policy ใช้ customer scenario เดียวกัน; ไม่มีการปรับ simulator เพื่อให้ RL ชนะ. ผลอ้างอิงในโจทย์เป็นค่าคร่าว ๆ: ผลที่นี่ต่างเล็กน้อย โดยเฉพาะ Rule-based ของ Midscale (+6.76% เทียบช่วง +1–5%) และ n-step DR ของ Midscale (+21.18% เทียบช่วง +15–18%). ได้ตรวจ mask, reward/cancellation timing, common seeds, KPI denominator และ test suite แล้ว; Expedia ที่เข้าถึงไม่ได้และการ calibrate HBD เป็นข้อจำกัดที่อาจมีผล แต่ไม่สามารถระบุเหตุเชิงสาเหตุจากการทดลองนี้ได้
 

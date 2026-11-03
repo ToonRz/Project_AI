@@ -14,7 +14,7 @@ import pandas as pd
 from src.baselines import FixedPolicy, RuleBasedPolicy
 from src.config import PROJECT_ROOT, load_config
 from src.env import HotelPricingEnv
-from src.hotels import Hotel, generate_hotel_population
+from src.hotels import Hotel, generate_hotel_population, generate_validation_hotels
 from src.rl_agent import QTablePolicy, TabularQLearner
 
 
@@ -254,13 +254,18 @@ def evaluate_agents(
     """Evaluate Fixed, Rule-based, and greedy tabular policies on common scenarios."""
     config = config or load_config()
     episodes_per_tier = episodes_per_tier or config["evaluation"]["episodes_per_tier"]
-    _, test_hotels = generate_hotel_population(config)
+    if config["evaluation"]["test_hotel_pool"] == "validation":
+        hotels = generate_validation_hotels(config)
+        seed_base = config["evaluation"]["validation_seed_base"]
+    else:
+        _, hotels = generate_hotel_population(config)
+        seed_base = config["evaluation"]["seed_base"]
     episodes, kpis, by_season, by_weekend = _evaluate_pool(
         q_table,
-        test_hotels,
+        hotels,
         config,
         episodes_per_tier,
-        config["evaluation"]["seed_base"],
+        seed_base,
         config["evaluation"]["seed_episode_multiplier"],
         model_label,
         update_counts=update_counts,
@@ -615,9 +620,12 @@ def main() -> None:
     parser.add_argument("--sensitivity", action="store_true")
     parser.add_argument("--heatmap", action="store_true")
     parser.add_argument("--replay", action="store_true")
+    parser.add_argument("--pool", choices=["test", "validation"], default=None)
     parser.add_argument("--config", default="config/sim_config.yaml")
     args = parser.parse_args()
     config = load_config(args.config)
+    if args.pool:
+        config["evaluation"]["test_hotel_pool"] = args.pool
     q_path = _project_path(args.q_table)
     q_table = np.load(q_path)
     update_counts = _load_update_counts(q_path)

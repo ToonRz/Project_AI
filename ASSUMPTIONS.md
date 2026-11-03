@@ -75,3 +75,27 @@ Rule-based เทียบ Fixed ได้ Budget +3.86%, Midscale +8.14%, Luxur
 - Stress มี 450 episode จาก 5 worlds × 3 tiers × 10 hotels × 3 policies; sensitivity มี 540 episode จาก 6 one-factor cases × 3 tiers × 10 hotels × 3 policies. Heatmap มี 2,160 state/model; replay CSV มี hourly 19,440 แถว, daily 237 แถว และ customer log 804 แถว
 - Full-sample recommendation: Rule-based สำหรับ Budget (ชนะ RL ใน main และทุก stress world); RL สำหรับ Midscale และ Luxury. ใน stress, RL ชนะ Rule-based ใน Midscale 4/5 โลกและ Luxury 5/5 โลก
 - ผลต่างเล็กน้อยจากช่วง lab reference: Rule-based Midscale +6.76% เทียบช่วง +1–5%; n-step DR Midscale +21.18% เทียบ +15–18%. ตรวจ action mask, cancellation/reward alignment, seeds, baseline reference และ KPI aggregation แล้ว โดยไม่ได้ปรับ simulator; Expedia unavailable และ HBD-based calibration เป็นข้อจำกัด แต่สรุปสาเหตุจากผลนี้โดยตรงไม่ได้
+
+## Phase 7 · ปรับ agent ตามแผน (2026-11-03)
+
+รายละเอียดการทดลองและกฎตัดสินอยู่ใน [PLAN.md](PLAN.md) สรุปสั้น:
+
+- รันการประเมินหลักซ้ำครบ 18,000 episode ได้กำไรตรงกับ `results/phase6_main_episodes.csv` ทุก episode
+- **สาเหตุที่ Midscale สูงกว่าช่วงอ้างอิง:** Fixed ที่ ×1.00 ตั้งราคาต่ำเกินไป (ราคาคงที่ ×1.50 ได้ +20.9% แต่ขายห้องได้แค่ 60%) และค่าลูกค้าที่ calibrate ใน `config/tier_profiles.json` ต่างจากค่าโจทย์ใน `config/sim_config.yaml` โดยเฉพาะ β ขนาดห้อง ถ้าใช้ค่าโจทย์ทั้งหมด RL Midscale เหลือ +15.10% ส่วน Rule-based Midscale ยังอธิบายส่วนต่างจากช่วง +1–5% ไม่ได้ ไม่พบ bug
+- simulator ใช้ค่าลูกค้าจาก `config/tier_profiles.json` ค่าในส่วน `tiers.*.segments`, `ota_share_*` และ `demand.season_multipliers`/`dow_multipliers` ของ `sim_config.yaml` เป็นแค่ค่า fallback
+- σ ของ WTP (0.45) มาจากส่วนเบี่ยงเบนของ log-ADR ทั้งชุดข้อมูล ซึ่งน่าจะกว้างกว่า WTP ของลูกค้ารายคน
+- เพิ่มชุด validation 10 แห่งต่อ tier (seed 778, seed ฐานการประเมิน 19000) ใช้ปรับแต่งทั้งหมด และประเมิน test ครั้งเดียวตอนท้าย
+- **Budget:** warm-start จาก Rule-based ได้ +4.72% บน validation ยังต่ำกว่า Rule-based +5.19% การฝึกต่อไม่ช่วย จึงใช้ Rule-based กับ Budget
+- **Luxury:** ฝึกใหม่โดยใส่ค่าปรับตอนจบ episode เมื่อ occupancy ต่ำกว่า Fixed − 3 จุด (λ = 1 × ราคาอ้างอิงต่อห้องที่ขาด) 3 seed บน validation ได้ +23.43% (±0.03) occupancy 94.2% เทียบกับไม่มีค่าปรับ +22.98% (±1.21) 92.6% จึงใช้ λ = 1 บันทึกเป็น `models/q_table_final.npy` (Budget/Midscale เหมือน `q_table_n_step_domain_randomization.npy`)
+
+**ผล test ครั้งสุดท้าย** (`results/final/`, 500 episode/tier):
+
+| Tier | Policy ที่ใช้ | กำไรเทียบ Fixed | Occupancy (เกณฑ์) | Conversion (Fixed) |
+|---|---|---:|---|---:|
+| Budget | Rule-based | +5.41% | 78.0% (≥ 70.4%) ✅ | 50.9% (47.3%) |
+| Midscale | RL ตารางเดิม | +21.19% | 88.9% (≥ 85.5%) ✅ | 48.8% (54.3%) |
+| Luxury | RL λ = 1 | +20.79% | 91.0% (≥ 89.0%) ✅ | 51.3% (58.1%) |
+
+- Luxury ผ่านเกณฑ์ occupancy แล้ว (ตารางเดิมได้ 88.4% ไม่ผ่าน) แต่กำไรลดจาก +22.54% เป็น +20.79% (−1.75 จุด) **ไม่ผ่านเกณฑ์ "กำไรไม่ลดเกิน 1 จุด"** บน test ไม่มีตารางไหนผ่านทั้งสองเกณฑ์ ไม่ได้เลือกตารางใหม่จากผล test เพื่อไม่ให้ test รั่ว
+- Stress (`results/final/phase6_stress_kpis.csv`): Luxury RL ชนะ Rule-based ทุกโลก (+17.2% ถึง +35.5% เทียบ +3.3% ถึง +6.5%) แต่ในโลก demand ต่ำและ WTP ต่ำ occupancy ของ RL ต่ำกว่า Fixed 3.8–3.9 จุด Midscale เหมือนเดิม (แพ้ Rule-based เฉพาะ demand ต่ำ 7.03% เทียบ 7.40%)
+- Budget ไม่ผ่านเกณฑ์ "RL ≥ Rule-based" จึงคงข้อเสนอเดิม: Rule-based สำหรับ Budget, RL สำหรับ Midscale/Luxury

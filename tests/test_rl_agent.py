@@ -111,3 +111,72 @@ def test_unseen_state_uses_reference_markup_clamped_to_mask():
     learner.update_counts[state + (0,)] = 1
     env.reset(seed=10, options={"hotel": hotel, "season": "shoulder", "is_weekend": False})
     assert policy.select_actions(env)[0] == 0
+
+
+def test_epsilon_start_scales_schedule_and_keeps_default():
+    config = load_config()
+    learner = TabularQLearner(config)
+    assert learner.epsilon(0, 100) == 1.0
+    assert learner.epsilon(0, 100, start=0.3) == 0.3
+    assert learner.epsilon(99, 100, start=0.3) == config["rl"]["epsilon_min"]
+
+
+def test_warm_start_trains_only_requested_tier_from_behavior_actions(tmp_path):
+    from src.baselines import FixedPolicy
+    from src.train import train_agent
+
+    config = load_config()
+    config["paths"]["models"] = str(tmp_path / "models")
+    config["paths"]["results"] = str(tmp_path / "results")
+    config["rl"]["checkpoint_interval_episodes"] = 0
+    learner = TabularQLearner(config)
+    learner.q_table[1:] = 7.0
+
+    trained, _, _ = train_agent(
+        config,
+        episodes_per_tier=1,
+        learner=learner,
+        tiers=["budget"],
+        behavior_policy=FixedPolicy(config),
+    )
+
+    assert trained is learner
+    assert np.all(trained.q_table[1:] == 7.0)
+    assert trained.update_counts[1:].sum() == 0
+    fixed_level = config["baselines"]["fixed_markup_level"]
+    assert trained.update_counts[0].sum() > 0
+    assert trained.update_counts[0][..., fixed_level].sum() == trained.update_counts[0].sum()
+
+
+def test_occupancy_penalties_cover_only_the_shortfall():
+    from src.train import occupancy_penalties
+
+    assert occupancy_penalties(np.array([2, 1, 0]), 20, 0.80, 100.0).sum() == 0.0
+    penalties = occupancy_penalties(np.array([6, 2, 0]), 20, 0.80, 100.0)
+    assert np.isclose(penalties.sum(), 100.0 * (0.80 * 20 - 12))
+    assert np.allclose(penalties, [300.0, 100.0, 0.0])
+
+
+def test_occupancy_penalty_only_changes_end_of_episode_values(tmp_path):
+    from src.train import train_agent
+
+    def run(penalty_per_room):
+        config = load_config()
+        config["paths"]["models"] = str(tmp_path / f"models_{penalty_per_room}")
+        config["paths"]["results"] = str(tmp_path / f"results_{penalty_per_room}")
+        config["rl"]["checkpoint_interval_episodes"] = 0
+        config["rl"]["occupancy_penalty_per_room"] = penalty_per_room
+        config["rl"]["occupancy_floor_margin"] = -1.0
+        learner, curve, _ = train_agent(config, episodes_per_tier=1, tiers=["luxury"])
+        return learner.q_table, curve
+
+    plain, plain_curve = run(0.0)
+    penalized, penalized_curve = run(1.0)
+
+    assert plain_curve["occupancy_penalty"].iloc[0] == 0.0
+    assert penalized_curve["occupancy_penalty"].iloc[0] > 0.0
+    assert plain_curve["net_profit"].iloc[0] == penalized_curve["net_profit"].iloc[0]
+    changed = np.argwhere(~np.isclose(plain, penalized))
+    last_day_bucket = 0
+    assert len(changed) > 0
+    assert set(changed[:, 4]) == {last_day_bucket}

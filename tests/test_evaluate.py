@@ -49,3 +49,23 @@ def test_stress_world_changes_only_requested_hotel_attributes():
     )
     assert stressed.segments["leisure"]["wtp_sigma"] == original.segments["leisure"]["wtp_sigma"] * 0.7
     assert source.demand_per_room_episode == original.demand_per_room_episode
+
+
+def test_evaluate_agents_can_use_validation_pool(tmp_path):
+    import numpy as np
+
+    from src.evaluate import evaluate_agents
+    from src.rl_agent import TabularQLearner
+
+    config = load_config()
+    config["paths"]["results"] = str(tmp_path)
+    config["evaluation"]["test_hotel_pool"] = "validation"
+    q_table = TabularQLearner(config).q_table
+
+    episodes, _ = evaluate_agents(q_table, config, episodes_per_tier=1, output_stem="validation_smoke")
+
+    assert set(episodes["hotel_id"]) == {f"{tier}_validation_00" for tier in config["tiers"]}
+    assert set(episodes["scenario_seed"]) == {
+        config["evaluation"]["validation_seed_base"] + config["tiers"][tier]["id"] for tier in config["tiers"]
+    }
+    assert (tmp_path / "validation_smoke_kpis.csv").exists()

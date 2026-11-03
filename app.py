@@ -142,6 +142,9 @@ st.header("ผลประเมินบนโรงแรมที่ไม่
 episodes_path = results_dir / "phase6_main_episodes.csv"
 if episodes_path.exists():
     episodes = pd.read_csv(episodes_path)
+    final_episodes_path = results_dir / "final" / "final_main_episodes.csv"
+    if final_episodes_path.exists():
+        episodes = pd.concat([episodes, pd.read_csv(final_episodes_path)], ignore_index=True)
     selected_episodes = episodes.loc[
         episodes["model"].eq(model_label)
         & episodes["tier"].eq(tier)
