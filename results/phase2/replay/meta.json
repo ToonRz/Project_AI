@@ -1,0 +1,89 @@
+{
+ "budget": {
+  "hotel": "budget_test_00",
+  "season": "low",
+  "weekend": true,
+  "cost": 279,
+  "rooms": [
+   {
+    "name": "Standard",
+    "count": 23,
+    "size_m2": 14.85
+   },
+   {
+    "name": "Superior",
+    "count": 12,
+    "size_m2": 19.8
+   },
+   {
+    "name": "Family",
+    "count": 4,
+    "size_m2": 26.4
+   }
+  ],
+  "seed": 9000,
+  "initial_prices": [
+   1250.0,
+   1550.0,
+   1950.0
+  ]
+ },
+ "midscale": {
+  "hotel": "midscale_test_00",
+  "season": "shoulder",
+  "weekend": false,
+  "cost": 662,
+  "rooms": [
+   {
+    "name": "Standard",
+    "count": 26,
+    "size_m2": 26.94
+   },
+   {
+    "name": "Deluxe",
+    "count": 14,
+    "size_m2": 35.22
+   },
+   {
+    "name": "Suite",
+    "count": 7,
+    "size_m2": 53.87
+   }
+  ],
+  "seed": 9001,
+  "initial_prices": [
+   2500.0,
+   3100.0,
+   4350.0
+  ]
+ },
+ "luxury": {
+  "hotel": "luxury_test_00",
+  "season": "high",
+  "weekend": false,
+  "cost": 1276,
+  "rooms": [
+   {
+    "name": "Deluxe",
+    "count": 11,
+    "size_m2": 35.41
+   },
+   {
+    "name": "Premier",
+    "count": 7,
+    "size_m2": 48.69
+   },
+   {
+    "name": "Suite",
+    "count": 3,
+    "size_m2": 75.25
+   }
+  ],
+  "seed": 9002,
+  "initial_prices": [
+   6600.0,
+   8500.0,
+   12050.0
+  ]
+ }
+}

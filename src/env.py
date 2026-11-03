@@ -7,7 +7,7 @@ import math
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import gymnasium as gym
 import numpy as np
@@ -16,6 +16,9 @@ from gymnasium import spaces
 from src.config import PROJECT_ROOT, load_config
 from src.customer_agent import Booking, CustomerAgent, CustomerDecision, CustomerScenario
 from src.hotels import Hotel, generate_hotel_population
+
+if TYPE_CHECKING:
+    from src.market import Market
 
 
 def _project_path(path: str | Path) -> Path:
@@ -72,6 +75,7 @@ class HotelPricingEnv(gym.Env):
         self.is_weekend = False
         self.scenario_seed = 0
         self.scenario: CustomerScenario | None = None
+        self.market: Market | None = None
         self.step_index = 0
         self.hours_remaining = self.config["episode"]["steps"]
         self.levels = np.full(room_count, self.config["pricing"]["initial_price_level"], dtype=np.int64)
@@ -169,7 +173,7 @@ class HotelPricingEnv(gym.Env):
             price = self.price_for_level(room_index, requested_level)
         return int(requested_level), float(price), allowed, forced
 
-    def room_state(self, room_index: int) -> tuple[int, int, int, int, int, int, int]:
+    def room_state(self, room_index: int) -> tuple[int, ...]:
         """Return the tabular state for a room before its action is selected."""
         tier_id = self.config["tiers"][self.hotel.tier]["id"]
         season_id = self.config["episode"]["season_names"].index(self.season)
@@ -186,7 +190,7 @@ class HotelPricingEnv(gym.Env):
         remaining_bucket = int(math.ceil(self.rooms_left[room_index] / room_capacity * remaining_buckets))
         clock = self.step_index % hours
         period = clock // self.config["rl"]["state"]["time_period_hours"]
-        return (
+        state = (
             int(tier_id),
             int(room_index),
             int(season_id),
@@ -195,6 +199,27 @@ class HotelPricingEnv(gym.Env):
             int(remaining_bucket),
             int(period),
         )
+        if self.config["market"]["enabled"]:
+            return state + (self._market_bucket(room_index),)
+        return state
+
+    def _market_bucket(self, room_index: int) -> int:
+        """Our previous-hour price vs the competitor median: 0 cheaper, 1 within band, 2 dearer."""
+        median = (
+            self.market.median_price(max(self.step_index - 1, 0), room_index)
+            if self.market is not None
+            else None
+        )
+        if median is None:
+            return 1
+        our = float(self.prices[room_index])
+        band = self.config["market"]["price_band"]
+        tolerance = 1e-9 * median
+        if our < (1.0 - band) * median - tolerance:
+            return 0
+        if our > (1.0 + band) * median + tolerance:
+            return 2
+        return 1
 
     def _observation(self) -> np.ndarray:
         tier_names = list(self.config["tiers"])
@@ -269,6 +294,7 @@ class HotelPricingEnv(gym.Env):
             self.is_weekend = bool(
                 self.np_random.random() < self.config["episode"]["weekend_probability"]
             )
+        self.market = options.get("market")
         scenario_seed = options.get("scenario_seed", seed)
         if scenario_seed is None:
             scenario_seed = int(self.np_random.integers(0, np.iinfo(np.int32).max))
@@ -359,7 +385,11 @@ class HotelPricingEnv(gym.Env):
 
         customers = self.scenario.customers_by_step[self.step_index]
         bookings, decisions = self.customer_agent.respond(
-            customers, self.hotel, self.prices, self.rooms_left
+            customers,
+            self.hotel,
+            self.prices,
+            self.rooms_left,
+            self.market.offers(self.step_index) if self.market is not None else None,
         )
         self._last_decisions = decisions
         commission_rate = self.config["pricing"]["ota_commission"]
@@ -454,6 +484,7 @@ class HotelPricingEnv(gym.Env):
             ),
             "wtp_thb": decision.wtp_thb,
             "via_ota": decision.via_ota,
+            "competitor_index": decision.competitor_index,
         }
 
     def episode_metrics(self) -> dict[str, float | int | str | bool]:

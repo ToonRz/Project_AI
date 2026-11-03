@@ -18,14 +18,19 @@ class FixedPolicy:
 
     name = "Fixed"
 
-    def __init__(self, config: dict[str, Any] | None = None):
+    def __init__(self, config: dict[str, Any] | None = None, markup_level: int | None = None):
         self.config = config or load_config()
+        self.markup_level = markup_level
 
     def select_actions(self, env: HotelPricingEnv) -> np.ndarray:
         env.prepare_step()
         actions = np.zeros(len(env.levels), dtype=np.int64)
         decided_prices: list[float] = []
-        target = self.config["baselines"]["fixed_markup_level"]
+        target = (
+            self.config["baselines"]["fixed_markup_level"]
+            if self.markup_level is None
+            else self.markup_level
+        )
         for room_index in range(len(actions)):
             lower = decided_prices[-1] if decided_prices else None
             level, price, _, _ = env.resolve_room_action(room_index, target, lower)

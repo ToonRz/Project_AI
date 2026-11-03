@@ -49,6 +49,7 @@ class CustomerDecision:
     room_index: int | None
     wtp_thb: float
     via_ota: bool
+    competitor_index: int | None = None
 
 
 class CustomerAgent:
@@ -167,23 +168,55 @@ class CustomerAgent:
             visitor_count_by_segment=visitor_counts,
         )
 
+    @staticmethod
+    def _competitor_decision(customer: ScenarioCustomer, competitor_index: int) -> CustomerDecision:
+        return CustomerDecision(
+            customer.customer_id,
+            customer.segment,
+            "competitor",
+            None,
+            customer.wtp_thb,
+            customer.via_ota,
+            competitor_index,
+        )
+
     def respond(
         self,
         customers: Sequence[ScenarioCustomer],
         hotel: Hotel,
         prices: Sequence[float],
         rooms_left: np.ndarray,
+        offers: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | None = None,
     ) -> tuple[list[Booking], list[CustomerDecision]]:
-        """Let each visitor select the highest-surplus available room."""
+        """Let each visitor select the highest-surplus available room.
+
+        With ``offers`` (competitor prices, sizes, availability, owner index), OTA visitors
+        also compare competitor rooms and may leave for the best-surplus competitor room.
+        """
         prices_array = np.asarray(prices, dtype=float)
         available = rooms_left > 0
         sizes = np.asarray([room.size_m2 for room in hotel.rooms], dtype=float)
         relative_sizes = sizes / sizes.min()
+        market_active = offers is not None and len(offers[0]) > 0
+        if market_active:
+            comp_prices, comp_sizes, comp_available, comp_owner = offers
+            comp_relative_sizes = comp_sizes / sizes.min()
         bookings: list[Booking] = []
         decisions: list[CustomerDecision] = []
 
         for customer in customers:
+            comp_best = -np.inf
+            if market_active and customer.via_ota:
+                comp_beta = hotel.segments[customer.segment]["size_beta"]
+                comp_surplus = customer.wtp_thb * np.power(comp_relative_sizes, comp_beta) - comp_prices
+                comp_surplus = np.where(comp_available, comp_surplus, -np.inf)
+                comp_room = int(np.argmax(comp_surplus))
+                comp_best = float(comp_surplus[comp_room])
+
             if not available.any():
+                if comp_best >= 0.0:
+                    decisions.append(self._competitor_decision(customer, int(comp_owner[comp_room])))
+                    continue
                 decisions.append(
                     CustomerDecision(
                         customer.customer_id,
@@ -200,6 +233,9 @@ class CustomerAgent:
             surplus = customer.wtp_thb * np.power(relative_sizes, beta) - prices_array
             surplus = np.where(available, surplus, -np.inf)
             room_index = int(np.argmax(surplus))
+            if comp_best >= 0.0 and comp_best > surplus[room_index]:
+                decisions.append(self._competitor_decision(customer, int(comp_owner[comp_room])))
+                continue
             if surplus[room_index] < 0.0:
                 decisions.append(
                     CustomerDecision(

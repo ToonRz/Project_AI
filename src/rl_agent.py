@@ -11,7 +11,7 @@ from src.config import load_config
 from src.env import HotelPricingEnv
 
 
-TabularState = tuple[int, int, int, int, int, int, int]
+TabularState = tuple[int, ...]
 
 
 class TabularQLearner:
@@ -38,6 +38,7 @@ class TabularQLearner:
             len(state_config["day_bucket_ranges"]),
             state_config["remaining_bucket_count"] + 1,
             state_config["clock_periods_per_day"],
+            *((self.config["market"]["price_bucket_count"],) if self.config["market"]["enabled"] else ()),
             len(self.config["pricing"]["markup_levels"]),
         )
         self.q_table = (

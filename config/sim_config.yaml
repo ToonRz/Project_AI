@@ -305,6 +305,16 @@ baselines:
   rule_thresholds: [0.4, 0.7, 0.9]
   rule_markup_levels: [1, 2, 4, 5]
 
+market:
+  enabled: false
+  seed: 779                      # competitor-pool seed and salt for per-episode market draws
+  competitors_per_tier: 10       # size of the dedicated validation/test competitor pool
+  train_competitor_count: [3, 5] # inclusive range per training episode
+  eval_competitor_count: 4
+  strategies: {fixed_0.85: 1, fixed_1.00: 2, fixed_1.15: 3, rule_based: null}  # name -> markup level (null = RuleBasedPolicy)
+  price_band: 0.05
+  price_bucket_count: 3
+
 eda:
   output_figures: 5
   figure_size_inches: [8, 4.5]

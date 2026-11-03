@@ -15,6 +15,7 @@ from src.baselines import FixedPolicy, RuleBasedPolicy
 from src.config import PROJECT_ROOT, load_config
 from src.env import HotelPricingEnv
 from src.hotels import Hotel, generate_hotel_population, generate_validation_hotels
+from src.market import Market, build_market, generate_competitor_hotels
 from src.rl_agent import QTablePolicy, TabularQLearner
 
 
@@ -63,6 +64,34 @@ def _comparison_table(episodes: pd.DataFrame, group_columns: list[str]) -> pd.Da
     return grouped
 
 
+def goal_table(episodes: pd.DataFrame, group_columns: list[str], margin: float) -> pd.DataFrame:
+    """Profit, occupancy-floor and customer-outcome summary per policy and group."""
+    keys = ["policy", *group_columns]
+    grouped = episodes.groupby(keys, as_index=False, dropna=False).agg(
+        net_profit=("net_profit", "mean"),
+        occupancy=("occupancy", "mean"),
+        booked=("booked", "sum"),
+        too_expensive=("too_expensive", "sum"),
+        full=("full", "sum"),
+        competitor=("competitor", "sum"),
+        ota_booked=("ota_booked", "sum"),
+        episodes=("net_profit", "size"),
+    )
+    grouped["conversion"] = grouped["booked"] / (
+        grouped["booked"] + grouped["too_expensive"] + grouped["competitor"]
+    )
+    grouped["ota_market_share"] = grouped["ota_booked"] / (grouped["ota_booked"] + grouped["competitor"])
+    fixed = (
+        grouped.loc[grouped["policy"].eq("Fixed"), [*group_columns, "net_profit", "occupancy"]]
+        .rename(columns={"net_profit": "fixed_net_profit", "occupancy": "fixed_occupancy"})
+    )
+    grouped = grouped.merge(fixed, on=group_columns, how="left")
+    grouped["net_profit_pct_vs_fixed"] = (grouped["net_profit"] / grouped["fixed_net_profit"] - 1.0) * 100.0
+    grouped["occupancy_floor"] = grouped["fixed_occupancy"] - margin
+    grouped["meets_floor"] = grouped["occupancy"] >= grouped["occupancy_floor"] - 1e-12
+    return grouped.drop(columns=["fixed_net_profit", "fixed_occupancy"])
+
+
 def _make_policies(
     q_table: np.ndarray,
     config: dict[str, Any],
@@ -103,6 +132,7 @@ def _run_one_scenario(
     config: dict[str, Any],
     metadata: dict[str, Any] | None = None,
     capture_replay: bool = False,
+    market: Market | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     episode_rows: list[dict[str, Any]] = []
     hourly_rows: list[dict[str, Any]] = []
@@ -119,13 +149,18 @@ def _run_one_scenario(
                 "season": season,
                 "is_weekend": weekend,
                 "scenario_seed": seed,
+                "market": market,
             },
         )
+        outcomes = {"booked": 0, "too_expensive": 0, "full": 0, "competitor": 0, "ota_booked": 0}
         daily_bookings: dict[tuple[int, int], int] = {}
         step_index = 0
         while True:
             action = policy.select_actions(env)
             _, _, terminated, truncated, info = env.step(action)
+            for customer in info["customer_log"]:
+                outcomes[customer["status"]] += 1
+                outcomes["ota_booked"] += customer["status"] == "booked" and customer["via_ota"]
             if capture_replay:
                 elapsed_day = step_index // config["episode"]["hours_per_day"] + 1
                 hour = step_index % config["episode"]["hours_per_day"]
@@ -181,6 +216,7 @@ def _run_one_scenario(
                         "is_weekend": weekend,
                         **metadata,
                         **info["episode_metrics"],
+                        **outcomes,
                     }
                 )
                 if capture_replay:
@@ -210,6 +246,7 @@ def _evaluate_pool(
     seed_multiplier: int,
     model_label: str,
     update_counts: np.ndarray | None = None,
+    competitor_hotels: dict[str, list[Hotel]] | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     policies = _make_policies(
         q_table,
@@ -218,6 +255,10 @@ def _evaluate_pool(
         update_counts=update_counts,
     )
     episode_rows: list[dict[str, Any]] = []
+    market_enabled = config["market"]["enabled"]
+    if market_enabled:
+        competitors = competitor_hotels or generate_competitor_hotels(config)
+        competitor_count = config["market"]["eval_competitor_count"]
 
     for tier_name, hotels in test_hotels.items():
         tier_id = config["tiers"][tier_name]["id"]
@@ -225,6 +266,18 @@ def _evaluate_pool(
             hotel = hotels[episode_index % len(hotels)]
             seed = seed_base + seed_multiplier * episode_index + tier_id
             season, weekend = _episode_context(seed, config)
+            market = (
+                build_market(
+                    competitors[tier_name],
+                    (competitor_count, competitor_count),
+                    season,
+                    weekend,
+                    (seed,),
+                    config,
+                )
+                if market_enabled
+                else None
+            )
             rows, _, _, _ = _run_one_scenario(
                 hotel,
                 seed,
@@ -233,6 +286,7 @@ def _evaluate_pool(
                 policies,
                 config,
                 metadata={"model": model_label, "episode_index": episode_index},
+                market=market,
             )
             episode_rows.extend(rows)
 
@@ -274,6 +328,9 @@ def evaluate_agents(
     output_dir.mkdir(parents=True, exist_ok=True)
     episodes.to_csv(output_dir / f"{output_stem}_episodes.csv", index=False)
     kpis.to_csv(output_dir / f"{output_stem}_kpis.csv", index=False)
+    goal_table(episodes, ["model", "tier"], config["rl"]["occupancy_floor_margin"]).to_csv(
+        output_dir / f"{output_stem}_goals.csv", index=False
+    )
     by_season.to_csv(output_dir / f"{output_stem}_by_season.csv", index=False)
     by_weekend.to_csv(output_dir / f"{output_stem}_by_weekend.csv", index=False)
     return episodes, kpis
@@ -346,13 +403,34 @@ def run_stress_tests(
     rows: list[dict[str, Any]] = []
     hotel_count = config["evaluation"]["stress_hotels_per_tier"]
     seed_base = config["evaluation"]["stress_seed_base"]
+    market_enabled = config["market"]["enabled"]
+    if market_enabled:
+        competitor_pool = generate_competitor_hotels(config)
+        competitor_count = config["market"]["eval_competitor_count"]
     for world_name, world in config["evaluation"]["stress_worlds"].items():
         for tier_name, hotels in test_hotels.items():
             tier_id = config["tiers"][tier_name]["id"]
+            if market_enabled:
+                stressed_competitors = [
+                    _stress_hotel(competitor, world, world_name)
+                    for competitor in competitor_pool[tier_name]
+                ]
             for hotel_index in range(hotel_count):
                 hotel = _stress_hotel(hotels[hotel_index % len(hotels)], world, world_name)
                 seed = seed_base + tier_id
                 season, weekend = _episode_context(seed, config)
+                market = (
+                    build_market(
+                        stressed_competitors,
+                        (competitor_count, competitor_count),
+                        season,
+                        weekend,
+                        (seed, hotel_index),
+                        config,
+                    )
+                    if market_enabled
+                    else None
+                )
                 episode_rows, _, _, _ = _run_one_scenario(
                     hotel,
                     seed,
@@ -361,6 +439,7 @@ def run_stress_tests(
                     policies,
                     config,
                     metadata={"world": world_name, "hotel_index": hotel_index},
+                    market=market,
                 )
                 rows.extend(episode_rows)
     episodes = pd.DataFrame(rows)
@@ -369,6 +448,9 @@ def run_stress_tests(
     output_dir.mkdir(parents=True, exist_ok=True)
     episodes.to_csv(output_dir / "phase6_stress_episodes.csv", index=False)
     kpis.to_csv(output_dir / "phase6_stress_kpis.csv", index=False)
+    goal_table(episodes, ["world", "tier"], config["rl"]["occupancy_floor_margin"]).to_csv(
+        output_dir / "phase6_stress_goals.csv", index=False
+    )
     return episodes, kpis
 
 
@@ -418,9 +500,12 @@ def run_sensitivity(
     policies = _make_policies(
         q_table, config, config["evaluation"]["seed_base"], update_counts
     )
-    cases: list[tuple[str, float, dict[str, list[Hotel]]]] = []
+    cases: list[tuple[str, float, dict[str, list[Hotel]], dict[str, list[Hotel]] | None]] = []
+    market_enabled = config["market"]["enabled"]
+    competitor_count = config["market"]["eval_competitor_count"]
 
     _, base_test_hotels = generate_hotel_population(config)
+    base_competitors = generate_competitor_hotels(config) if market_enabled else None
     for conversion in conversion_values:
         hotels = {
             tier: [
@@ -429,18 +514,34 @@ def run_sensitivity(
             ]
             for tier, tier_hotels in base_test_hotels.items()
         }
-        cases.append(("conversion_rate", float(conversion), hotels))
+        competitors = (
+            {
+                tier: [
+                    _scaled_demand_hotel(hotel, base_conversion, conversion)
+                    for hotel in tier_hotels
+                ]
+                for tier, tier_hotels in base_competitors.items()
+            }
+            if market_enabled
+            else None
+        )
+        cases.append(("conversion_rate", float(conversion), hotels, competitors))
     for factor in spread_values:
         spread_config, spread_profiles = _scaled_spread_inputs(config, float(factor))
         _, test_hotels = generate_hotel_population(
             spread_config,
             profiles=spread_profiles,
         )
-        cases.append(("spread_factor", float(factor), test_hotels))
+        competitors = (
+            generate_competitor_hotels(spread_config, profiles=spread_profiles)
+            if market_enabled
+            else None
+        )
+        cases.append(("spread_factor", float(factor), test_hotels, competitors))
 
     rows: list[dict[str, Any]] = []
     hotel_count = config["evaluation"]["stress_hotels_per_tier"]
-    for parameter, value, test_hotels in cases:
+    for parameter, value, test_hotels, case_competitors in cases:
         for tier_name, hotels in test_hotels.items():
             tier_id = config["tiers"][tier_name]["id"]
             for hotel_index in range(hotel_count):
@@ -451,6 +552,18 @@ def run_sensitivity(
                     + tier_id
                 )
                 season, weekend = _episode_context(seed, config)
+                market = (
+                    build_market(
+                        case_competitors[tier_name],
+                        (competitor_count, competitor_count),
+                        season,
+                        weekend,
+                        (seed, hotel_index),
+                        config,
+                    )
+                    if market_enabled
+                    else None
+                )
                 episode_rows, _, _, _ = _run_one_scenario(
                     hotel,
                     seed,
@@ -459,6 +572,7 @@ def run_sensitivity(
                     policies,
                     config,
                     metadata={"parameter": parameter, "value": value, "hotel_index": hotel_index},
+                    market=market,
                 )
                 rows.extend(episode_rows)
     episodes = pd.DataFrame(rows)
@@ -467,6 +581,9 @@ def run_sensitivity(
     output_dir.mkdir(parents=True, exist_ok=True)
     episodes.to_csv(output_dir / "phase6_sensitivity_episodes.csv", index=False)
     kpis.to_csv(output_dir / "phase6_sensitivity_kpis.csv", index=False)
+    goal_table(episodes, ["parameter", "value", "tier"], config["rl"]["occupancy_floor_margin"]).to_csv(
+        output_dir / "phase6_sensitivity_goals.csv", index=False
+    )
     return episodes, kpis
 
 
@@ -576,6 +693,11 @@ def generate_replay(
     hourly: list[dict[str, Any]] = []
     daily: list[dict[str, Any]] = []
     customers: list[dict[str, Any]] = []
+    market_enabled = config["market"]["enabled"]
+    competitor_rows: list[dict[str, Any]] = []
+    if market_enabled:
+        competitor_pool = generate_competitor_hotels(config)
+        competitor_count = config["market"]["eval_competitor_count"]
     for tier_name, hotels in test_hotels.items():
         tier_id = config["tiers"][tier_name]["id"]
         hotel = hotels[config["evaluation"]["policy_replay_hotel_index"] % len(hotels)]
@@ -586,6 +708,31 @@ def generate_replay(
             + tier_id
         )
         season, weekend = _episode_context(seed, config)
+        market = None
+        if market_enabled:
+            market = build_market(
+                competitor_pool[tier_name],
+                (competitor_count, competitor_count),
+                season,
+                weekend,
+                (seed,),
+                config,
+            )
+            for competitor_index, track in enumerate(market.competitors):
+                for step, room_index in np.ndindex(track.prices.shape):
+                    competitor_rows.append(
+                        {
+                            "tier": tier_name,
+                            "competitor_index": competitor_index,
+                            "hotel_id": track.hotel_id,
+                            "strategy": track.strategy,
+                            "step": step,
+                            "room_index": room_index,
+                            "price_thb": float(track.prices[step, room_index]),
+                            "available": bool(track.available[step, room_index]),
+                            "size_m2": float(track.sizes_m2[room_index]),
+                        }
+                    )
         _, hour_rows, day_rows, customer_rows = _run_one_scenario(
             hotel,
             seed,
@@ -594,6 +741,7 @@ def generate_replay(
             policies,
             config,
             capture_replay=True,
+            market=market,
         )
         hourly.extend(hour_rows)
         daily.extend(day_rows)
@@ -606,6 +754,8 @@ def generate_replay(
     hourly_table.to_csv(output_dir / "phase6_replay_hourly.csv", index=False)
     daily_table.to_csv(output_dir / "phase6_replay_daily.csv", index=False)
     customer_table.to_csv(output_dir / "phase6_replay_customer_log.csv", index=False)
+    if market_enabled:
+        pd.DataFrame(competitor_rows).to_csv(output_dir / "phase6_replay_competitors.csv", index=False)
     return hourly_table, daily_table, customer_table
 
 

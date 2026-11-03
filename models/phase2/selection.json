@@ -1,0 +1,86 @@
+{
+ "budget": {
+  "penalty": 1.0,
+  "seed": 1777,
+  "run": "pen1_s1777",
+  "policy_used": "Rule-based",
+  "validation_rl_profit_pct": 5.494907912930591,
+  "validation_rule_profit_pct": 10.541335407153984,
+  "validation_rl_occupancy": 0.4805482418025421,
+  "validation_floor": 0.3330957008484696,
+  "config_summary": [
+   {
+    "penalty": 0.0,
+    "mean_profit": 4.386897501672027,
+    "sd_profit": 1.1662975038073762,
+    "passing": 2,
+    "seeds": 2,
+    "mean_margin": 0.1376317834437089
+   },
+   {
+    "penalty": 1.0,
+    "mean_profit": 5.0293525509788495,
+    "sd_profit": 0.6583947069076682,
+    "passing": 2,
+    "seeds": 2,
+    "mean_margin": 0.14722146933028912
+   }
+  ]
+ },
+ "midscale": {
+  "penalty": 1.0,
+  "seed": 1777,
+  "run": "pen1_s1777",
+  "policy_used": "RL",
+  "validation_rl_profit_pct": 15.29906099343885,
+  "validation_rule_profit_pct": 5.922968585909527,
+  "validation_rl_occupancy": 0.7087481751037602,
+  "validation_floor": 0.6162836338607774,
+  "config_summary": [
+   {
+    "penalty": 0.0,
+    "mean_profit": 13.33957302899249,
+    "sd_profit": 0.5265609546642323,
+    "passing": 2,
+    "seeds": 2,
+    "mean_margin": 0.08760330044048065
+   },
+   {
+    "penalty": 1.0,
+    "mean_profit": 15.014875860014797,
+    "sd_profit": 0.4018984699131034,
+    "passing": 2,
+    "seeds": 2,
+    "mean_margin": 0.08901532452292565
+   }
+  ]
+ },
+ "luxury": {
+  "penalty": 1.0,
+  "seed": 1777,
+  "run": "pen1_s1777",
+  "policy_used": "RL",
+  "validation_rl_profit_pct": 15.757633705790685,
+  "validation_rule_profit_pct": 5.401240204943769,
+  "validation_rl_occupancy": 0.8311521524750901,
+  "validation_floor": 0.7390888324105865,
+  "config_summary": [
+   {
+    "penalty": 0.0,
+    "mean_profit": 14.568056784874384,
+    "sd_profit": 1.545838756195641,
+    "passing": 2,
+    "seeds": 2,
+    "mean_margin": 0.07258666674064457
+   },
+   {
+    "penalty": 1.0,
+    "mean_profit": 15.528330938640645,
+    "sd_profit": 0.3242830831932665,
+    "passing": 2,
+    "seeds": 2,
+    "mean_margin": 0.096693534884854
+   }
+  ]
+ }
+}

@@ -13,6 +13,7 @@ from src.baselines import FixedPolicy
 from src.config import PROJECT_ROOT, load_config
 from src.env import HotelPricingEnv
 from src.hotels import generate_hotel_population
+from src.market import build_market
 from src.rl_agent import TabularQLearner
 
 
@@ -106,6 +107,16 @@ def train_agent(
             "is_weekend": is_weekend,
             "scenario_seed": scenario_seed,
         }
+        if config["market"]["enabled"]:
+            options["market"] = build_market(
+                train_hotels[tier_name],
+                config["market"]["train_competitor_count"],
+                season,
+                is_weekend,
+                (scenario_seed,),
+                config,
+                exclude_hotel_id=hotel.hotel_id,
+            )
         env.reset(seed=scenario_seed, options=options)
         penalty_rate = config["rl"]["occupancy_penalty_per_room"] * hotel.reference_price_thb
         target_occupancy = (
